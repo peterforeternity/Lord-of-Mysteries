@@ -1,0 +1,195 @@
+"""Pydantic models for Game API request/response schemas."""
+
+from __future__ import annotations
+
+from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+
+class ActionType(str, Enum):
+    TRAVEL = "travel"
+    INSPECT = "inspect"
+    TALK = "talk"
+    USE_SPIRIT_VISION = "use_spirit_vision"
+    PERFORM_DIVINATION = "perform_divination"
+    PERFORM_RITUAL = "perform_ritual"
+    USE_ITEM = "use_item"
+    SUBMIT_HYPOTHESIS = "submit_hypothesis"
+    REST = "rest"
+    SAVE = "save"
+    LOAD = "load"
+
+
+class GameAction(BaseModel):
+    """A player action submitted to the game engine."""
+
+    action_type: ActionType
+    target_id: str = ""
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    expected_version: int = 0
+
+
+class ActionResponse(BaseModel):
+    """Returned after every action attempt."""
+
+    success: bool
+    state_version: int = 0
+    events: list[dict[str, Any]] = Field(default_factory=list)
+    view: GameView | None = None
+    error_code: str | None = None
+    error_detail: str | None = None
+
+
+class ClueInfo(BaseModel):
+    """Public clue info for the view."""
+
+    clue_id: str
+    display_name: str
+    description: str
+    source_type: str
+    is_new: bool = False
+
+
+class NpcInfo(BaseModel):
+    """Public NPC info for the view."""
+
+    npc_id: str
+    name: str
+    description: str
+    emotion: str
+    current_location_id: str
+    available_claims: list[ClaimInfo] = Field(default_factory=list)
+
+
+class ClaimInfo(BaseModel):
+    """Public claim info for the view."""
+
+    claim_id: str
+    content: str
+    is_lie: bool = False
+    speaker_believes_it: bool = True
+
+
+class LocationInfo(BaseModel):
+    """Public location info for the view."""
+
+    location_id: str
+    display_name: str
+    description: str
+    is_current: bool = False
+    has_been_visited: bool = False
+    available_clues: list[ClueInfo] = Field(default_factory=list)
+    available_npcs: list[str] = Field(default_factory=list)
+
+
+class HypothesisInfo(BaseModel):
+    """Public hypothesis info for the view."""
+
+    hypothesis_id: str
+    title: str
+    description: str
+    status: str
+    min_confidence: int
+    required_clue_count: int
+    found_clue_count: int
+    can_submit: bool
+
+
+class EndingInfo(BaseModel):
+    """Public ending info."""
+
+    ending_id: str
+    title: str
+    description: str
+    ending_type: str
+
+
+class ItemInfo(BaseModel):
+    """Public item info for the view."""
+
+    item_id: str
+    name: str
+    description: str
+    active_ability: str
+    holding_cost: str
+
+
+class RitualInfo(BaseModel):
+    """Public ritual info for the view."""
+
+    ritual_id: str
+    name: str
+    purpose: str
+    required_materials: list[str]
+    space_condition: str
+    steps: list[str]
+    can_perform: bool = False
+
+
+class PlayerStatus(BaseModel):
+    """Player resource status."""
+
+    spirituality: int
+    corruption: int
+    stability: int
+    current_location_id: str
+    current_location_name: str = ""
+    visited_locations: list[LocationInfo] = Field(default_factory=list)
+
+
+class EventLogEntry(BaseModel):
+    """A single event in the event log."""
+
+    event_id: str
+    event_type: str
+    description: str
+    timestamp: str
+
+
+class GameView(BaseModel):
+    """The complete game state view returned to the client.
+
+    The client must NOT derive authority from this view;
+    all state mutations must go through actions.
+    """
+
+    state_version: int
+    player: PlayerStatus = Field(default_factory=PlayerStatus)
+    current_scene: str = ""
+    current_description: str = ""
+    available_actions: list[str] = Field(default_factory=list)
+    clues: list[ClueInfo] = Field(default_factory=list)
+    npcs: list[NpcInfo] = Field(default_factory=list)
+    hypotheses: list[HypothesisInfo] = Field(default_factory=list)
+    endings: list[EndingInfo] = Field(default_factory=list)
+    items: list[ItemInfo] = Field(default_factory=list)
+    rituals: list[RitualInfo] = Field(default_factory=list)
+    event_log: list[EventLogEntry] = Field(default_factory=list)
+    game_over: bool = False
+    final_ending: EndingInfo | None = None
+    ai_enabled: bool = False
+
+
+class CaseMetadata(BaseModel):
+    """Public case metadata for case selection."""
+
+    case_id: str
+    title: str
+    description: str
+    version: str
+
+
+class CaseList(BaseModel):
+    """List of available cases."""
+
+    cases: list[CaseMetadata]
+
+
+class NewGameResponse(BaseModel):
+    """Response after creating a new game."""
+
+    save_id: str
+    case_id: str
+    view: GameView

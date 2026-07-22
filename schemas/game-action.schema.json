@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GameAction",
+  "description": "A player action submitted to the Game API",
+  "type": "object",
+  "properties": {
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "travel", "inspect", "talk", "use_spirit_vision",
+        "perform_divination", "perform_ritual", "use_item",
+        "submit_hypothesis", "rest", "save", "load"
+      ]
+    },
+    "target_id": {
+      "type": "string",
+      "description": "ID of the target (location, clue, npc, item, etc.)"
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Additional parameters for the action"
+    },
+    "expected_version": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Expected state version for conflict detection"
+    }
+  },
+  "required": ["action_type", "expected_version"]
+}

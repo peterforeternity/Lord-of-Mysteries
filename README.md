@@ -1,79 +1,101 @@
-# Project Grey Fog
+# Project Grey Fog / 灰雾调查录
 
-High-density investigation RPG headless core and AI dialogue gateway.
+High-density investigation RPG — headless core, AI dialogue gateway, and browser-based text game MVP.
 
 ## Quick Start
 
 ```bash
-# Install dependencies (no PYTHONPATH needed)
+# Install dependencies
 uv sync
 
-# Run all checks
+# Run all Python checks
 uv run ruff check .
 uv run black --check .
 uv run mypy .
 uv run pytest --cov --cov-report=term-missing --cov-fail-under=90
 
-# Run CLI Demo
-uv run python -m investigation_core
-
-# Run AI Gateway
-uv run uvicorn ai_gateway.main:app
-
-# Content validation tools
-uv run python tools/validate_content.py content/cases/case_clockmaker_01
-uv run python tools/check_clue_reachability.py content/cases/case_clockmaker_01
-uv run python tools/enumerate_endings.py content/cases/case_clockmaker_01
-uv run python tools/simulate_npc_removal.py content/cases/case_clockmaker_01
+# Run all playthroughs
 uv run python tools/run_playthrough.py --all
+
+# Start Game API (text game backend)
+uv run uvicorn game_api.main:app --port 8001
+
+# Start AI Gateway
+uv run uvicorn ai_gateway.main:app --port 8000
+
+# Start Frontend (in another terminal)
+cd apps/web && npm install && npm run dev
 ```
+
+## Text Game MVP
+
+The browser-based text game is at `apps/web/` (React + TypeScript + Vite).
+
+**Pages:**
+- Start page (new/continue/case select/settings)
+- Main game page (3-column desktop, tab-based mobile)
+- Deduction board
+- Ritual interface
+- Save/Load
+- Case conclusion
+
+**Game API** at `services/game_api/` provides:
+- `POST /v1/game/new` — Create new game
+- `POST /v1/game/{save_id}/action` — Execute action
+- `GET /v1/game/{save_id}/view` — Get game view
+- `POST /v1/game/{save_id}/save` — Save game
+- `POST /v1/game/{save_id}/load` — Load game
+- `GET /v1/cases` — List available cases
+
+Actions: `travel`, `inspect`, `talk`, `use_spirit_vision`, `perform_divination`, `perform_ritual`, `use_item`, `submit_hypothesis`, `rest`, `save`, `load`
+
+AI is disabled by default in Phase 1. All NPC dialogue uses pre-made claims and fallback dialogue.
 
 ## API Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/v1/health` | Health check |
-| GET | `/v1/prompt-version` | Current prompt & model version |
-| POST | `/v1/dialogue/respond` | NPC dialogue response |
-| POST | `/v1/dialogue/classify-intent` | Classify player intent |
-| POST | `/v1/case/recap` | Case investigation recap |
-| GET | `/v1/metrics` | Request metrics summary |
-
-All errors return stable `error_code` in the response body.
+| Method | Path | Service | Description |
+|--------|------|---------|-------------|
+| GET | `/v1/health` | game_api | Health check |
+| GET | `/v1/cases` | game_api | List available cases |
+| POST | `/v1/game/new` | game_api | Create new game session |
+| POST | `/v1/game/{id}/action` | game_api | Execute game action |
+| GET | `/v1/game/{id}/view` | game_api | Get current game view |
+| POST | `/v1/game/{id}/save` | game_api | Save game |
+| POST | `/v1/game/{id}/load` | game_api | Load game |
+| GET | `/v1/health` | ai_gateway | AI Gateway health check |
+| POST | `/v1/dialogue/respond` | ai_gateway | NPC dialogue response |
 
 ## Project Structure
 
 ```
+├── apps/web/                      # React + TypeScript frontend
 ├── docs/                          # Architecture & design docs
 ├── schemas/                       # JSON Schema definitions
-├── content/cases/case_clockmaker_01/  # Original case "The Clockmaker's Disappearance"
-├── packages/investigation_core/   # Domain engine (deterministic)
-├── services/ai_gateway/           # FastAPI AI Gateway with MockLLMProvider
-├── tools/                         # Content validation, CI, and playthrough tools
+├── content/cases/case_clockmaker_01/  # Case data
+├── packages/investigation_core/   # Domain engine (deterministic, frozen)
+├── services/
+│   ├── ai_gateway/                # FastAPI AI Gateway
+│   └── game_api/                  # FastAPI Game API (SQLite saves)
+├── tools/                         # Validation & CI tools
 ├── .github/workflows/             # CI configuration
-└── unreal/                        # UE5.8 integration (future)
+└── unreal/                        # UE5.8 integration (paused)
 ```
 
-## Phase 1 Scope (Completed)
+## Phase 1 (Completed)
 
 - Headless Investigation Core (Fact, Claim, Clue, Hypothesis, Ending)
-- Original case "The Clockmaker's Disappearance" (4 hypotheses, 5 endings)
+- Original case "The Clockmaker's Disappearance" (5 locations, 6 NPCs, 4 hypotheses, 5 endings)
 - Dual-source validation for all core secret facts
-- Hypothesis contradiction mechanism (contradicting facts auto-reject, contradicting clues reduce confidence)
-- 7 deterministic playthroughs (true, partial, bad, AI-disabled, save/resume, ritual failure recovery, NPC removal recovery)
-- AI Gateway with 15+ safety boundary tests
-  - Prompt injection detection (JSON/XML/Markdown/code blocks)
-  - Fact leak prevention
-  - Claim whitelist enforcement
-  - World action restriction (requests_world_action always False)
-  - Timeout and disconnect resilience
-- 290+ automated tests with 98.95% coverage
-- CI pipeline (ruff, black, mypy, pytest, content validation, playthrough)
+- 7 deterministic playthroughs
+- AI Gateway with safety boundary tests
+- 311 automated tests with 96.9% coverage
+- CI pipeline (ruff, black, mypy, pytest, playthrough)
 
 ## Principles
 
-1. **Deterministic Core** - Same state + same seed = same result
-2. **AI Read-Only** - LLM never writes game state
-3. **No Secret in Client** - All credentials on server only
-4. **Fail Closed** - AI errors fall back gracefully
-5. **Dual Source** - Every critical fact has ≥2 independent clue paths
+1. **Deterministic Core** — Same state + same seed = same result
+2. **AI Read-Only** — LLM never writes game state
+3. **No Secret in Client** — All credentials on server only
+4. **Fail Closed** — AI errors fall back gracefully
+5. **Dual Source** — Every critical fact has ≥2 independent clue paths
+6. **No Pixel Love** — MVP uses CSS-only visuals
