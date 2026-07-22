@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/case.schema.json",
+  "title": "Case",
+  "description": "A detective case in the mystery world of 诡秘之主 (Circle of Inevitability).",
+  "type": "object",
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "description": "Unique identifier for the case."
+    },
+    "title": {
+      "type": "string",
+      "description": "Display title of the case."
+    },
+    "description": {
+      "type": "string",
+      "description": "Long-form description or briefing of the case."
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version for future-proofing."
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "$ref": "fact.schema.json"
+      },
+      "description": "List of facts relevant to this case."
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "$ref": "claim.schema.json"
+      },
+      "description": "List of claims made by NPCs."
+    },
+    "clues": {
+      "type": "array",
+      "items": {
+        "$ref": "clue.schema.json"
+      },
+      "description": "List of discoverable clues in the case."
+    },
+    "hypotheses": {
+      "type": "array",
+      "items": {
+        "$ref": "npc.schema.json"
+      },
+      "description": "List of NPCs involved in the case."
+    },
+    "npcs": {
+      "type": "array",
+      "items": {
+        "$ref": "npc.schema.json"
+      },
+      "description": "List of NPCs involved in the case."
+    },
+    "endings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ending_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          }
+        },
+        "required": ["ending_id", "label"],
+        "additionalProperties": false
+      },
+      "description": "Possible endings for the case."
+    },
+    "initial_scene_id": {
+      "type": "string",
+      "description": "ID of the scene where the case begins."
+    }
+  },
+  "required": [
+    "case_id",
+    "title",
+    "description",
+    "version",
+    "facts",
+    "claims",
+    "clues",
+    "hypotheses",
+    "npcs",
+    "endings",
+    "initial_scene_id"
+  ],
+  "additionalProperties": false
+}

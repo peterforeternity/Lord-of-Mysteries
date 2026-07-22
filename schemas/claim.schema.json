@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/claim.schema.json",
+  "title": "Claim",
+  "description": "A statement or assertion made by an NPC, which may or may not be truthful.",
+  "type": "object",
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "description": "Unique identifier for the claim."
+    },
+    "speaker_npc_id": {
+      "type": "string",
+      "description": "Reference to the NPC who made this claim."
+    },
+    "content": {
+      "type": "string",
+      "description": "The textual content of the claim."
+    },
+    "truth_status": {
+      "type": "string",
+      "enum": ["true", "false", "partial", "misleading"],
+      "description": "Objective truth classification of the claim."
+    },
+    "speaker_believes_it": {
+      "type": "boolean",
+      "description": "Whether the speaker genuinely believes this claim to be true."
+    },
+    "available_when": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags or conditions under which this claim becomes available."
+    },
+    "forbidden_when": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags or conditions under which this claim must be withheld."
+    },
+    "strength": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "Weight of this claim for deduction scoring (1=weak, 3=strong)."
+    }
+  },
+  "required": [
+    "claim_id",
+    "speaker_npc_id",
+    "content",
+    "truth_status",
+    "speaker_believes_it",
+    "available_when",
+    "forbidden_when",
+    "strength"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,21 @@
+{
+  "id": "bad_ending",
+  "description": "执行仪式失败导致污染累积，不提交任何假说，触发灰雾弥漫坏结局",
+  "seed": 42,
+  "expected_ending_id": "ending_bad",
+  "expected_clue_ids": [],
+  "expected_corruption_max": 5,
+  "actions": [
+    {"action": "travel", "location_id": "workshop"},
+    {"action": "inspect", "clue_id": "clue_lab_notes"},
+    {"action": "inspect", "clue_id": "clue_burn_pattern"},
+    {"action": "inspect", "clue_id": "clue_residual_energy"},
+    {"action": "inspect", "clue_id": "clue_trapped_clock"},
+    {"action": "use_ability", "event": "evt_spirit_vision"},
+    {"action": "inspect", "clue_id": "clue_spirit_vision_entity"},
+    {"action": "travel", "location_id": "police_office"},
+    {"action": "inspect", "clue_id": "clue_collector_knowledge"},
+    {"action": "perform_ritual", "ritual_id": "ritual_purification", "materials": ["silver_dust", "purification_herbs", "protective_circle_chalk"], "seed": 1},
+    {"action": "perform_ritual", "ritual_id": "ritual_purification", "materials": ["silver_dust", "purification_herbs", "protective_circle_chalk"], "seed": 4}
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/npc.schema.json",
+  "title": "NPC",
+  "description": "A non-player character in the case.",
+  "type": "object",
+  "properties": {
+    "npc_id": {
+      "type": "string",
+      "description": "Unique identifier for the NPC."
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the NPC."
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the NPC's appearance, background, and demeanor."
+    },
+    "role": {
+      "type": "string",
+      "enum": ["core", "environmental"],
+      "description": "Whether this NPC is central to the case or part of the environment."
+    },
+    "known_claim_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Claims this NPC knows about and can reference."
+    },
+    "lie_claim_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Claims this NPC will lie about (intentionally give false information)."
+    },
+    "forbidden_fact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Facts this NPC must never reveal under any circumstances."
+    },
+    "personality": {
+      "type": "object",
+      "description": "NPC personality traits scored 0-1.",
+      "properties": {
+        "formality": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "How formal the NPC's speech is (0=casual, 1=very formal)."
+        },
+        "anxiety": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "How anxious the NPC appears (0=calm, 1=highly anxious)."
+        },
+        "aggression": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "How aggressive the NPC is (0=passive, 1=hostile)."
+        }
+      },
+      "required": ["formality", "anxiety", "aggression"],
+      "additionalProperties": false
+    },
+    "initial_location_id": {
+      "type": "string",
+      "description": "Scene ID where this NPC starts."
+    },
+    "default_emotion": {
+      "type": "string",
+      "description": "Default emotional state of the NPC (e.g. neutral, guarded, friendly)."
+    }
+  },
+  "required": [
+    "npc_id",
+    "name",
+    "description",
+    "role",
+    "known_claim_ids",
+    "lie_claim_ids",
+    "forbidden_fact_ids",
+    "personality",
+    "initial_location_id",
+    "default_emotion"
+  ],
+  "additionalProperties": false
+}

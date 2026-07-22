@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/fact.schema.json",
+  "title": "Fact",
+  "description": "An established truth or piece of information within a case.",
+  "type": "object",
+  "properties": {
+    "fact_id": {
+      "type": "string",
+      "description": "Unique identifier for the fact."
+    },
+    "case_id": {
+      "type": "string",
+      "description": "Reference to the parent case."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief summary of the fact."
+    },
+    "truth": {
+      "type": "boolean",
+      "description": "Whether this fact is objectively true in the game world."
+    },
+    "secrecy": {
+      "type": "string",
+      "enum": ["public", "restricted", "core_secret"],
+      "description": "Secrecy level of this fact."
+    },
+    "prerequisite_fact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Facts that must be known before this fact can be revealed."
+    },
+    "revealed_by_clue_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Clues that, when discovered, reveal this fact."
+    }
+  },
+  "required": [
+    "fact_id",
+    "case_id",
+    "summary",
+    "truth",
+    "secrecy",
+    "prerequisite_fact_ids",
+    "revealed_by_clue_ids"
+  ],
+  "additionalProperties": false
+}

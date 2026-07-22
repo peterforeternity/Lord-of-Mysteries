@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/clue.schema.json",
+  "title": "Clue",
+  "description": "A discoverable piece of evidence that can reveal facts.",
+  "type": "object",
+  "properties": {
+    "clue_id": {
+      "type": "string",
+      "description": "Unique identifier for the clue."
+    },
+    "case_id": {
+      "type": "string",
+      "description": "Reference to the parent case."
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Player-facing name of the clue."
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description shown when the clue is examined."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["environment", "npc_statement", "document", "experiment", "deduction"],
+      "description": "How this clue is obtained."
+    },
+    "location_id": {
+      "type": "string",
+      "description": "Reference to the scene or location where this clue is found."
+    },
+    "reveals_fact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Facts that are revealed when this clue is discovered."
+    },
+    "requires_any_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags where at least one must be active for this clue to appear."
+    },
+    "requires_all_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags that must all be active for this clue to appear."
+    },
+    "strength": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "How compelling this clue is for deduction scoring (1=weak, 3=strong)."
+    },
+    "missable": {
+      "type": "boolean",
+      "description": "Whether this clue can be permanently missed if not collected in time."
+    }
+  },
+  "required": [
+    "clue_id",
+    "case_id",
+    "display_name",
+    "description",
+    "source_type",
+    "location_id",
+    "reveals_fact_ids",
+    "requires_any_tags",
+    "requires_all_tags",
+    "strength",
+    "missable"
+  ],
+  "additionalProperties": false
+}

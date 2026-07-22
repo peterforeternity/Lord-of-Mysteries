@@ -1,0 +1,24 @@
+{
+  "id": "ai_disabled",
+  "description": "纯调查流程，不与任何NPC交互，收集5条线索后提交仪式失控理论",
+  "seed": 42,
+  "expected_ending_id": "ending_true",
+  "expected_clue_ids": [
+    "clue_lab_notes",
+    "clue_burn_pattern",
+    "clue_material_receipt",
+    "clue_trapped_clock",
+    "clue_residual_energy"
+  ],
+  "expected_corruption_max": 2,
+  "actions": [
+    {"action": "travel", "location_id": "apartment"},
+    {"action": "inspect", "clue_id": "clue_material_receipt"},
+    {"action": "travel", "location_id": "workshop"},
+    {"action": "inspect", "clue_id": "clue_lab_notes"},
+    {"action": "inspect", "clue_id": "clue_burn_pattern"},
+    {"action": "inspect", "clue_id": "clue_residual_energy"},
+    {"action": "inspect", "clue_id": "clue_trapped_clock"},
+    {"action": "submit_hypothesis", "hypothesis_id": "hypothesis_ritual_accident"}
+  ]
+}

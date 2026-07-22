@@ -1,0 +1,36 @@
+{
+  "id": "true_ending",
+  "description": "完整调查路线，涵盖物证调查和灵性感知两条路径，取得完整真相结局",
+  "seed": 42,
+  "expected_ending_id": "ending_complete_truth",
+  "expected_clue_ids": [
+    "clue_lab_notes",
+    "clue_burn_pattern",
+    "clue_material_receipt",
+    "clue_trapped_clock",
+    "clue_residual_energy",
+    "clue_spirit_vision_entity",
+    "clue_collector_knowledge",
+    "clue_shopkeeper_testimony",
+    "clue_hidden_compartment"
+  ],
+  "expected_corruption_max": 2,
+  "actions": [
+    {"action": "travel", "location_id": "apartment"},
+    {"action": "inspect", "clue_id": "clue_material_receipt"},
+    {"action": "travel", "location_id": "workshop"},
+    {"action": "inspect", "clue_id": "clue_lab_notes"},
+    {"action": "inspect", "clue_id": "clue_burn_pattern"},
+    {"action": "inspect", "clue_id": "clue_residual_energy"},
+    {"action": "use_ability", "event": "evt_spirit_vision"},
+    {"action": "inspect", "clue_id": "clue_spirit_vision_entity"},
+    {"action": "inspect", "clue_id": "clue_trapped_clock"},
+    {"action": "use_ability", "event": "clue_trapped_clock"},
+    {"action": "inspect", "clue_id": "clue_hidden_compartment"},
+    {"action": "travel", "location_id": "police_office"},
+    {"action": "inspect", "clue_id": "clue_collector_knowledge"},
+    {"action": "travel", "location_id": "mystic_shop"},
+    {"action": "inspect", "clue_id": "clue_shopkeeper_testimony"},
+    {"action": "submit_hypothesis", "hypothesis_id": "hypothesis_complete_truth"}
+  ]
+}

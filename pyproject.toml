@@ -1,0 +1,80 @@
+[project]
+name = "project-grey-fog"
+version = "0.1.0"
+description = "Project Grey Fog - Headless Core for investigation RPG"
+requires-python = ">=3.12"
+dependencies = [
+    "ai-gateway",
+]
+
+[tool.uv.workspace]
+members = [
+    "packages/investigation_core",
+    "services/ai_gateway",
+]
+
+[tool.uv.sources]
+investigation-core = { workspace = true }
+ai-gateway = { workspace = true }
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+exclude = [".venv/", "build/", "*.egg-info", "__pycache__/", "_gen_openapi.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "ARG", "C4", "T20"]
+ignore = ["UP042", "E501", "C416", "E402"]
+
+[tool.ruff.lint.per-file-ignores]
+"tools/*" = ["T20", "ARG", "SIM102", "E402", "F841", "SIM221"]
+"packages/investigation_core/tests_inv/*" = ["T20", "ARG", "E402"]
+"packages/investigation_core/src/investigation_core/cli_demo.py" = ["T20", "E402"]
+"services/ai_gateway/tests_gw/*" = ["T20", "ARG", "E402"]
+"schemas/*" = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+exclude = [
+    "packages/investigation_core/tests_inv/",
+    "services/ai_gateway/tests_gw/",
+    "tools/",
+]
+
+[[tool.mypy.overrides]]
+module = "tests_inv.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "tests_gw.*"
+ignore_errors = true
+
+[dependency-groups]
+dev = [
+    "investigation-core",
+    "ruff>=0.5.0",
+    "black>=24.0",
+    "mypy>=1.10",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.27.0",
+]
+
+[tool.coverage.run]
+omit = ["*/cli_demo.py", "*/__main__.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["packages/investigation_core/tests_inv", "services/ai_gateway/tests_gw"]
+asyncio_mode = "auto"

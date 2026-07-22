@@ -1,0 +1,74 @@
+[
+  {
+    "npc_id": "npc_landlord",
+    "name": "弗雷德里克",
+    "description": "公寓房东，一个看似老实但眼神闪烁的中年人。",
+    "role": "core",
+    "known_claim_ids": ["claim_landlord_strange_behavior", "claim_landlord_no_issue", "claim_neighbor_noise", "claim_landlord_destroyed_evidence"],
+    "lie_claim_ids": ["claim_landlord_no_issue", "claim_landlord_destroyed_evidence"],
+    "forbidden_fact_ids": ["fact_landlord_hid_evidence"],
+    "personality": {"formality": 0.6, "anxiety": 0.7, "aggression": 0.3},
+    "initial_location_id": "apartment",
+    "default_emotion": "anxious"
+  },
+  {
+    "npc_id": "npc_doctor",
+    "name": "塞巴斯蒂安医生",
+    "description": "一位体面的中年医生，诊所里弥漫着药剂的气味。",
+    "role": "core",
+    "known_claim_ids": ["claim_doctor_last_visit", "claim_doctor_prescription"],
+    "lie_claim_ids": ["claim_doctor_prescription"],
+    "forbidden_fact_ids": ["fact_doctor_prescribed"],
+    "personality": {"formality": 0.9, "anxiety": 0.5, "aggression": 0.1},
+    "initial_location_id": "clinic",
+    "default_emotion": "guarded"
+  },
+  {
+    "npc_id": "npc_shopkeeper",
+    "name": "马尔科",
+    "description": "神秘材料店的店主，对顾客守口如瓶。",
+    "role": "core",
+    "known_claim_ids": ["claim_shopkeeper_sale", "claim_shopkeeper_rare_material"],
+    "lie_claim_ids": ["claim_shopkeeper_rare_material"],
+    "forbidden_fact_ids": [],
+    "personality": {"formality": 0.5, "anxiety": 0.4, "aggression": 0.2},
+    "initial_location_id": "mystic_shop",
+    "default_emotion": "neutral"
+  },
+  {
+    "npc_id": "npc_neighbor",
+    "name": "安娜",
+    "description": "住在失踪者隔壁的年轻女性，神经质但诚实。",
+    "role": "core",
+    "known_claim_ids": ["claim_neighbor_noise", "claim_neighbor_saw_nothing"],
+    "lie_claim_ids": [],
+    "forbidden_fact_ids": [],
+    "personality": {"formality": 0.4, "anxiety": 0.8, "aggression": 0.1},
+    "initial_location_id": "apartment",
+    "default_emotion": "anxious"
+  },
+  {
+    "npc_id": "npc_inspector",
+    "name": "哈罗德探员",
+    "description": "负责案件的警务调查员，科层制但合作。",
+    "role": "core",
+    "known_claim_ids": ["claim_inspector_no_leads", "claim_inspector_file"],
+    "lie_claim_ids": ["claim_inspector_no_leads"],
+    "forbidden_fact_ids": [],
+    "personality": {"formality": 0.7, "anxiety": 0.3, "aggression": 0.4},
+    "initial_location_id": "police_office",
+    "default_emotion": "neutral"
+  },
+  {
+    "npc_id": "npc_collector",
+    "name": "阿尔德里奇",
+    "description": "一位博学的古董钟表收藏家，对神秘学有浓厚兴趣。",
+    "role": "core",
+    "known_claim_ids": ["claim_collector_clock", "claim_collector_ritual_knowledge", "claim_collector_warning"],
+    "lie_claim_ids": [],
+    "forbidden_fact_ids": [],
+    "personality": {"formality": 0.6, "anxiety": 0.2, "aggression": 0.1},
+    "initial_location_id": "police_office",
+    "default_emotion": "friendly"
+  }
+]

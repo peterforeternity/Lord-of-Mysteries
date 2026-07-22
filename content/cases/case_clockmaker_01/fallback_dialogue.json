@@ -1,0 +1,200 @@
+[
+  {
+    "npc_id": "npc_landlord",
+    "trigger": "greeting",
+    "utterance": "弗雷德里克紧张地看着你：'又来了？我什么都不知道。'",
+    "dialogue_act": "greet",
+    "referenced_claim_ids": [],
+    "emotion": "anxious",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_landlord",
+    "trigger": "ask_case",
+    "utterance": "弗雷德里克擦了擦额头的汗：'那个钟表匠？他最近确实不太正常，半夜在房间里走来走去。但别的我真的不知道。'",
+    "dialogue_act": "answer_partial",
+    "referenced_claim_ids": ["claim_landlord_strange_behavior"],
+    "emotion": "anxious",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_landlord",
+    "trigger": "unknowable",
+    "utterance": "弗雷德里克摇摇头：'这我真的不知道，别问我了。'",
+    "dialogue_act": "refuse",
+    "referenced_claim_ids": [],
+    "emotion": "anxious",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_doctor",
+    "trigger": "greeting",
+    "utterance": "塞巴斯蒂安医生推了推眼镜：'有什么事吗？我很忙。'",
+    "dialogue_act": "greet",
+    "referenced_claim_ids": [],
+    "emotion": "guarded",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_doctor",
+    "trigger": "ask_case",
+    "utterance": "医生皱了皱眉：'埃里希是我的病人，但病人隐私我不能透露太多。只能说他在失踪前来过，看起来很疲惫。'",
+    "dialogue_act": "answer_partial",
+    "referenced_claim_ids": ["claim_doctor_last_visit"],
+    "emotion": "guarded",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_doctor",
+    "trigger": "unknowable",
+    "utterance": "医生冷淡地说：'医疗记录只能透露这么多，其他无可奉告。'",
+    "dialogue_act": "refuse",
+    "referenced_claim_ids": [],
+    "emotion": "guarded",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_shopkeeper",
+    "trigger": "greeting",
+    "utterance": "马尔科从柜台后抬起头：'欢迎光临。'",
+    "dialogue_act": "greet",
+    "referenced_claim_ids": [],
+    "emotion": "neutral",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_shopkeeper",
+    "trigger": "ask_case",
+    "utterance": "店主压低声音：'那个钟表匠确实来过，买了一些蜡烛和草药。但我不知道他拿去做什么。'",
+    "dialogue_act": "answer_partial",
+    "referenced_claim_ids": ["claim_shopkeeper_sale"],
+    "emotion": "neutral",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_shopkeeper",
+    "trigger": "unknowable",
+    "utterance": "马尔科摇头：'我是正经生意人，不该问的我不问。'",
+    "dialogue_act": "evade",
+    "referenced_claim_ids": [],
+    "emotion": "neutral",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_neighbor",
+    "trigger": "greeting",
+    "utterance": "安娜紧张地问：'你是来调查瓦赫特先生失踪的事吗？'",
+    "dialogue_act": "ask",
+    "referenced_claim_ids": [],
+    "emotion": "anxious",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_neighbor",
+    "trigger": "ask_case",
+    "utterance": "安娜压低声音：'那天晚上我听到了奇怪的声音，像是有人在用锤子敲打什么东西。持续了很久。'",
+    "dialogue_act": "answer",
+    "referenced_claim_ids": ["claim_neighbor_noise"],
+    "emotion": "anxious",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_neighbor",
+    "trigger": "unknowable",
+    "utterance": "安娜困惑地摇头：'我那天没出来看，太害怕了。'",
+    "dialogue_act": "evade",
+    "referenced_claim_ids": ["claim_neighbor_saw_nothing"],
+    "emotion": "anxious",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_inspector",
+    "trigger": "greeting",
+    "utterance": "哈罗德探员坐在办公桌后，示意你坐下。",
+    "dialogue_act": "greet",
+    "referenced_claim_ids": [],
+    "emotion": "neutral",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_inspector",
+    "trigger": "ask_case",
+    "utterance": "探员翻了翻桌上的文件夹：'我们初步调查没有发现强行进入的痕迹。案件目前没有进展。'",
+    "dialogue_act": "answer",
+    "referenced_claim_ids": ["claim_inspector_no_leads"],
+    "emotion": "neutral",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_inspector",
+    "trigger": "unknowable",
+    "utterance": "探员严肃地说：'案件信息有保密要求，这部分我不能告诉你。'",
+    "dialogue_act": "refuse",
+    "referenced_claim_ids": ["claim_inspector_file"],
+    "emotion": "guarded",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_collector",
+    "trigger": "greeting",
+    "utterance": "阿尔德里奇热情地打招呼：'你是来了解钟表知识的吗？'",
+    "dialogue_act": "greet",
+    "referenced_claim_ids": [],
+    "emotion": "friendly",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_collector",
+    "trigger": "ask_case",
+    "utterance": "收藏家若有所思：'旧钟表有时会成为某些存在的容器。如果你在工坊发现了什么古旧的钟表，千万不要轻易打开。'",
+    "dialogue_act": "answer",
+    "referenced_claim_ids": ["claim_collector_clock", "claim_collector_warning"],
+    "emotion": "friendly",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  },
+  {
+    "npc_id": "npc_collector",
+    "trigger": "unknowable",
+    "utterance": "阿尔德里奇歉意地笑了笑：'这方面的知识我也只是略懂皮毛。'",
+    "dialogue_act": "evade",
+    "referenced_claim_ids": ["claim_collector_ritual_knowledge"],
+    "emotion": "friendly",
+    "animation_tag": "",
+    "requests_world_action": false,
+    "safety_flags": []
+  }
+]

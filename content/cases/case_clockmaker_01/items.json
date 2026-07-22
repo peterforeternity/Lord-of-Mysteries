@@ -1,0 +1,15 @@
+[
+  {
+    "item_id": "item_old_clock",
+    "name": "古旧钟表",
+    "description": "工坊中发现的老爷钟，表面有异常裂纹，指针指向不同的时间。能感受到其中有某种存在。",
+    "active_ability": "触碰后可以短暂看到最近一次仪式失败的残影",
+    "passive_ability": "持有者会逐渐感到不安和焦虑",
+    "use_condition": "必须通过灵性感知激活",
+    "fixed_cost": "每次使用消耗1点灵性",
+    "holding_cost": "每小时污染+1",
+    "violation_condition": "尝试强行打开钟表外壳",
+    "penalty": "灵体实体脱离束缚，直接进入坏结局",
+    "cooldown": 3
+  }
+]

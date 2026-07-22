@@ -1,0 +1,20 @@
+{
+  "id": "partial_ending",
+  "description": "仅调查表面线索，提交事件事故理论，获得部分结局",
+  "seed": 42,
+  "expected_ending_id": "ending_partial",
+  "expected_clue_ids": [
+    "clue_burn_pattern",
+    "clue_landlord_contradiction",
+    "clue_neighbor_testimony"
+  ],
+  "expected_corruption_max": 2,
+  "actions": [
+    {"action": "travel", "location_id": "apartment"},
+    {"action": "inspect", "clue_id": "clue_neighbor_testimony"},
+    {"action": "inspect", "clue_id": "clue_landlord_contradiction"},
+    {"action": "travel", "location_id": "workshop"},
+    {"action": "inspect", "clue_id": "clue_burn_pattern"},
+    {"action": "submit_hypothesis", "hypothesis_id": "hypothesis_simple_disappearance"}
+  ]
+}

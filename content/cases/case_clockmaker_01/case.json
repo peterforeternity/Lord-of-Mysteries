@@ -1,0 +1,59 @@
+{
+  "case_id": "case_clockmaker_01",
+  "title": "钟表匠失踪案",
+  "description": "钟表匠埃里希·瓦赫特在锁住的公寓中神秘失踪，房间没有强行进入痕迹。玩家需要通过调查不同地点、与NPC对话、收集线索来揭示真相。",
+  "version": "0.1.0",
+  "initial_scene_id": "apartment",
+  "endings": [
+    {
+      "ending_id": "ending_normal_disappearance",
+      "case_id": "case_clockmaker_01",
+      "title": "错误结论",
+      "description": "你推断失踪者因精神压力自行离开，并将此事结案。但工坊中超自然痕迹暗示着更深的真相被永远掩埋。案件形式上的「告破」留下了未解的谜团。",
+      "ending_type": "bad_ending",
+      "required_hypothesis_id": "hypothesis_normal_disappearance",
+      "trigger_conditions": [],
+      "corruption_threshold": null
+    },
+    {
+      "ending_id": "ending_partial",
+      "case_id": "case_clockmaker_01",
+      "title": "失踪者归来",
+      "description": "你找到了失踪的钟表匠，但将事件解释为普通事故。你未能理解背后的超自然本质——异常物品仍然存在隐患，未来可能再次爆发。",
+      "ending_type": "partial_ending",
+      "required_hypothesis_id": "hypothesis_simple_disappearance",
+      "trigger_conditions": [],
+      "corruption_threshold": null
+    },
+    {
+      "ending_id": "ending_true",
+      "case_id": "case_clockmaker_01",
+      "title": "仪式真相",
+      "description": "你查明了仪式失控的真相，找到了被束缚的灵体实体。但你未能追踪到完整的证据链——失踪者的确切位置和完整的封印方案仍不明确。",
+      "ending_type": "true_ending",
+      "required_hypothesis_id": "hypothesis_ritual_accident",
+      "trigger_conditions": [],
+      "corruption_threshold": null
+    },
+    {
+      "ending_id": "ending_complete_truth",
+      "case_id": "case_clockmaker_01",
+      "title": "完整真相大白",
+      "description": "你通过物证调查和灵性感知两条独立路线，完整查明了事件的全部真相：失踪者进行禁忌仪式→仪式失败释放灵体→灵体束缚于旧钟表→失踪者陷入失神状态藏匿于暗格。你使用收藏家提供的封印知识成功中和灵体，案件圆满解决。",
+      "ending_type": "true_ending",
+      "required_hypothesis_id": "hypothesis_complete_truth",
+      "trigger_conditions": [],
+      "corruption_threshold": null
+    },
+    {
+      "ending_id": "ending_bad",
+      "case_id": "case_clockmaker_01",
+      "title": "灰雾弥漫",
+      "description": "由于处理不当，异常灵体扩散到了整个街区。你带着严重的灵性污染离开，案件成为悬案。",
+      "ending_type": "bad_ending",
+      "required_hypothesis_id": "",
+      "trigger_conditions": [],
+      "corruption_threshold": 3
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "ritual_id": "ritual_purification",
+    "name": "灵体净化仪式",
+    "purpose": "安全中和束缚在旧钟表中的灵体实体",
+    "required_knowledge_ids": ["fact_entity_bound", "fact_entity_neutralized"],
+    "required_materials": ["silver_dust", "purification_herbs", "protective_circle_chalk"],
+    "space_condition": "需在工坊中心进行",
+    "time_condition": "午夜时分效果最佳",
+    "steps": [
+      "在地上画保护圆",
+      "在圆中放置旧钟表",
+      "撒银粉于钟表四周",
+      "点燃净化草药",
+      "诵读封印咒文"
+    ],
+    "success_result": "灵体实体被安全中和，钟表匠从失神状态中恢复。",
+    "failure_result": "仪式反噬，灵体实体变得更加不稳定。",
+    "corruption_change": 1,
+    "may_alert_entities": ["npc_inspector"]
+  }
+]

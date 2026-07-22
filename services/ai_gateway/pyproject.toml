@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-gateway"
+version = "0.1.0"
+description = "FastAPI AI Gateway for Project Grey Fog"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.27.0",
+    "pydantic>=2.0",
+    "httpx>=0.27.0",
+    "investigation-core",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "ARG", "C4", "T20"]
+ignore = ["UP042", "E501", "C416", "E402"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests_gw/*" = ["T20", "ARG"]
+"src/ai_gateway/provider_adapter.py" = ["ARG"]
+"src/ai_gateway/fact_leak.py" = ["ARG"]
+"src/ai_gateway/mock_provider.py" = ["ARG"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests_gw"]
+asyncio_mode = "auto"

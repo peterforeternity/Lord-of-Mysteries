@@ -1,0 +1,142 @@
+[
+  {
+    "claim_id": "claim_landlord_strange_behavior",
+    "speaker_npc_id": "npc_landlord",
+    "content": "房东声称失踪者最近几个月行为怪异，经常半夜出门",
+    "truth_status": "partial",
+    "speaker_believes_it": true,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 2
+  },
+  {
+    "claim_id": "claim_doctor_last_visit",
+    "speaker_npc_id": "npc_doctor",
+    "content": "医生承认三天前见过失踪者，但声称只是常规检查",
+    "truth_status": "misleading",
+    "speaker_believes_it": false,
+    "available_when": [],
+    "forbidden_when": ["claim_doctor_prescription.revealed"],
+    "strength": 2
+  },
+  {
+    "claim_id": "claim_doctor_prescription",
+    "speaker_npc_id": "npc_doctor",
+    "content": "医生声称只开了普通安眠药",
+    "truth_status": "false",
+    "speaker_believes_it": false,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 2
+  },
+  {
+    "claim_id": "claim_shopkeeper_sale",
+    "speaker_npc_id": "npc_shopkeeper",
+    "content": "店主承认卖给过失踪者一些蜡烛和草药",
+    "truth_status": "partial",
+    "speaker_believes_it": true,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 2
+  },
+  {
+    "claim_id": "claim_neighbor_noise",
+    "speaker_npc_id": "npc_neighbor",
+    "content": "邻居声称当晚听到了沉重的敲击声",
+    "truth_status": "true",
+    "speaker_believes_it": true,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 3
+  },
+  {
+    "claim_id": "claim_inspector_no_leads",
+    "speaker_npc_id": "npc_inspector",
+    "content": "调查员声称没有任何线索",
+    "truth_status": "false",
+    "speaker_believes_it": false,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 1
+  },
+  {
+    "claim_id": "claim_collector_clock",
+    "speaker_npc_id": "npc_collector",
+    "content": "收藏家提到有些旧钟表可能成为灵体容器",
+    "truth_status": "true",
+    "speaker_believes_it": true,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 3
+  },
+  {
+    "claim_id": "claim_landlord_no_issue",
+    "speaker_npc_id": "npc_landlord",
+    "content": "房东声称失踪者一切正常",
+    "truth_status": "false",
+    "speaker_believes_it": false,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 1
+  },
+  {
+    "claim_id": "claim_inspector_file",
+    "speaker_npc_id": "npc_inspector",
+    "content": "调查员暗示有未公开的档案",
+    "truth_status": "true",
+    "speaker_believes_it": true,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 2
+  },
+  {
+    "claim_id": "claim_shopkeeper_rare_material",
+    "speaker_npc_id": "npc_shopkeeper",
+    "content": "店主声称从未出售过稀有材料",
+    "truth_status": "false",
+    "speaker_believes_it": false,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 2
+  },
+  {
+    "claim_id": "claim_neighbor_saw_nothing",
+    "speaker_npc_id": "npc_neighbor",
+    "content": "邻居声称什么都没看到",
+    "truth_status": "partial",
+    "speaker_believes_it": true,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 1
+  },
+  {
+    "claim_id": "claim_collector_ritual_knowledge",
+    "speaker_npc_id": "npc_collector",
+    "content": "收藏家知道一种封印灵体的方法",
+    "truth_status": "true",
+    "speaker_believes_it": true,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 3
+  },
+  {
+    "claim_id": "claim_landlord_destroyed_evidence",
+    "speaker_npc_id": "npc_landlord",
+    "content": "房东否认销毁过任何东西",
+    "truth_status": "false",
+    "speaker_believes_it": false,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 2
+  },
+  {
+    "claim_id": "claim_collector_warning",
+    "speaker_npc_id": "npc_collector",
+    "content": "收藏家警告说如果发现古旧钟表，千万不要强行打开",
+    "truth_status": "true",
+    "speaker_believes_it": true,
+    "available_when": [],
+    "forbidden_when": [],
+    "strength": 2
+  }
+]
