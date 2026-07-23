@@ -38,17 +38,23 @@ export default function EndingPage() {
   }
 
   const endingTypeLabels: Record<string, string> = {
+    true_ending: "真相结局",
     truth: "真相结局",
+    bad_ending: "疯狂结局",
     madness: "疯狂结局",
     sacrifice: "牺牲结局",
+    partial_ending: "部分真相",
     escape: "逃脱结局",
     unknown: "未知结局",
   };
 
   const endingTypeColors: Record<string, string> = {
+    true_ending: "text-green-400 border-green-600",
     truth: "text-green-400 border-green-600",
+    bad_ending: "text-red-400 border-red-600",
     madness: "text-red-400 border-red-600",
     sacrifice: "text-purple-400 border-purple-600",
+    partial_ending: "text-yellow-400 border-yellow-600",
     escape: "text-blue-400 border-blue-600",
     unknown: "text-mystic-text-dim border-mystic-card",
   };
@@ -68,6 +74,11 @@ export default function EndingPage() {
             <h2 className="text-2xl font-serif font-bold text-mystic-gold mb-2 tracking-widest">
               案件完结
             </h2>
+            {finalEnding?.title && (
+              <h3 className="text-xl font-serif text-mystic-text mb-1">
+                {finalEnding.title}
+              </h3>
+            )}
             <div className="divider" />
             <span
               className={`inline-block px-4 py-1 rounded-full text-sm font-medium border ${colorClass} bg-black/20`}
