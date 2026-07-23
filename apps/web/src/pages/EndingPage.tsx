@@ -4,13 +4,20 @@ import { useGameStore } from "../store";
 
 export default function EndingPage() {
   const navigate = useNavigate();
-  const { view } = useGameStore();
+  const { view, saveId, loading, fetchView } = useGameStore();
 
   useEffect(() => {
-    if (!view) {
+    if (view) return;
+    if (saveId && !loading) {
+      fetchView();
+    }
+  }, [view, saveId, loading, fetchView]);
+
+  useEffect(() => {
+    if (!view && !loading && !saveId) {
       navigate("/");
     }
-  }, [view, navigate]);
+  }, [view, navigate, loading, saveId]);
 
   if (!view || !view.game_over) {
     return (

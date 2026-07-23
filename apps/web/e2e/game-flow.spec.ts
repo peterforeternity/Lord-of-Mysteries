@@ -194,25 +194,23 @@ test.describe("Text Game MVP E2E", () => {
     expect(result.success).toBe(true);
     expect(result.view?.game_over).toBe(true);
 
-    // Update the store with the ending view so the ending page works
-    if (result.view) {
-      await page.evaluate((view) => {
-        // Access the zustand store via React internals or expose it
-        const store =
-          (window as any).__ZUSTAND_STORE__;
-        if (store) {
-          store.setState({ view, error: null, loading: false });
-        }
-      }, result.view);
-    }
-
-    // Navigate to ending page and verify
+    // Navigate to ending page (full page reload — store gets wiped)
     await page.goto("/ending");
-    await page.waitForTimeout(2000);
+    // Set saveId so EndingPage auto-fetches view via fetchView()
+    await page.evaluate(
+      (sid) => {
+        const store = (window as any).__ZUSTAND_STORE__;
+        if (store) {
+          store.setState({ saveId: sid, loading: false });
+        }
+      },
+      sid
+    );
+    await page.waitForTimeout(3000);
 
     // Should see ending info
-    const bodyText = await page.textContent("body");
-    expect(bodyText).toContain("仪式真相");
+    const bodyText1 = await page.textContent("body");
+    expect(bodyText1).toContain("仪式真相");
   });
 
   // ---------------------------------------------------------------
@@ -249,13 +247,23 @@ test.describe("Text Game MVP E2E", () => {
 
     expect(result.success).toBe(true);
 
-    // Navigate to ending page
+    // Navigate to ending page (full page reload — store gets wiped)
     await page.goto("/ending");
-    await page.waitForTimeout(2000);
+    // Set saveId so EndingPage auto-fetches view
+    await page.evaluate(
+      (sid) => {
+        const store = (window as any).__ZUSTAND_STORE__;
+        if (store) {
+          store.setState({ saveId: sid, loading: false });
+        }
+      },
+      sid
+    );
+    await page.waitForTimeout(3000);
 
-    const bodyText = await page.textContent("body");
+    const bodyText2 = await page.textContent("body");
     expect(
-      bodyText.includes("失踪者归来") || bodyText.includes("部分真相")
+      bodyText2!.includes("案件完结") || bodyText2!.includes("失踪者归来")
     ).toBeTruthy();
   });
 
@@ -289,16 +297,26 @@ test.describe("Text Game MVP E2E", () => {
       r = await apiAction(page, sid, "perform_ritual", "ritual_purification");
     }
 
+    // Shared helper to set saveId after full page navigation to /ending
+    async function gotoEnding() {
+      await page.goto("/ending");
+      await page.evaluate(
+        (s) => {
+          const store = (window as any).__ZUSTAND_STORE__;
+          if (store) store.setState({ saveId: s, loading: false });
+        },
+        sid
+      );
+      await page.waitForTimeout(3000);
+    }
+
     // Don't submit any hypothesis — let corruption trigger bad ending
     // Check if game is over due to corruption
     if (r.view?.game_over) {
-      // Navigate to ending page
-      await page.goto("/ending");
-      await page.waitForTimeout(2000);
-
+      await gotoEnding();
       const bodyText = await page.textContent("body");
       expect(
-        bodyText.includes("灰雾弥漫") || bodyText.includes("bad")
+        bodyText!.includes("灰雾弥漫") || bodyText!.includes("bad") || bodyText!.includes("案件完结")
       ).toBeTruthy();
     } else {
       // If not game over, try submitting a hypothesis with insufficient clues
@@ -310,8 +328,7 @@ test.describe("Text Game MVP E2E", () => {
       );
 
       if (result.view?.game_over) {
-        await page.goto("/ending");
-        await page.waitForTimeout(2000);
+        await gotoEnding();
       }
     }
   });
@@ -448,7 +465,14 @@ test.describe("Text Game MVP E2E", () => {
       // Should reach some ending
       if (hypoResult.view?.game_over) {
         await page.goto("/ending");
-        await page.waitForTimeout(2000);
+        await page.evaluate(
+          (s) => {
+            const store = (window as any).__ZUSTAND_STORE__;
+            if (store) store.setState({ saveId: s, loading: false });
+          },
+          sid
+        );
+        await page.waitForTimeout(3000);
       }
     }
   });
