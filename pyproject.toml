@@ -5,17 +5,20 @@ description = "Project Grey Fog - Headless Core for investigation RPG"
 requires-python = ">=3.12"
 dependencies = [
     "ai-gateway",
+    "game-api",
 ]
 
 [tool.uv.workspace]
 members = [
     "packages/investigation_core",
     "services/ai_gateway",
+    "services/game_api",
 ]
 
 [tool.uv.sources]
 investigation-core = { workspace = true }
 ai-gateway = { workspace = true }
+game-api = { workspace = true }
 
 [tool.ruff]
 target-version = "py312"
@@ -31,6 +34,8 @@ ignore = ["UP042", "E501", "C416", "E402"]
 "packages/investigation_core/tests_inv/*" = ["T20", "ARG", "E402"]
 "packages/investigation_core/src/investigation_core/cli_demo.py" = ["T20", "E402"]
 "services/ai_gateway/tests_gw/*" = ["T20", "ARG", "E402"]
+"services/game_api/tests_game/*" = ["T20", "ARG", "E402"]
+"unreal/**/*.py" = ["T20", "E402"]
 "schemas/*" = ["ALL"]
 
 [tool.ruff.format]
@@ -49,6 +54,8 @@ warn_unused_ignores = true
 exclude = [
     "packages/investigation_core/tests_inv/",
     "services/ai_gateway/tests_gw/",
+    "services/game_api/tests_game/",
+    "unreal/",
     "tools/",
 ]
 
@@ -76,5 +83,5 @@ dev = [
 omit = ["*/cli_demo.py", "*/__main__.py"]
 
 [tool.pytest.ini_options]
-testpaths = ["packages/investigation_core/tests_inv", "services/ai_gateway/tests_gw"]
+testpaths = ["packages/investigation_core/tests_inv", "services/ai_gateway/tests_gw", "services/game_api/tests_game"]
 asyncio_mode = "auto"

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GameView",
+  "description": "The complete game state view returned to the client",
+  "type": "object",
+  "properties": {
+    "state_version": {"type": "integer", "minimum": 0},
+    "player": {
+      "type": "object",
+      "properties": {
+        "spirituality": {"type": "integer"},
+        "corruption": {"type": "integer"},
+        "stability": {"type": "integer"},
+        "current_location_id": {"type": "string"},
+        "visited_locations": {"type": "array"}
+      }
+    },
+    "current_scene": {"type": "string"},
+    "current_description": {"type": "string"},
+    "available_actions": {"type": "array", "items": {"type": "string"}},
+    "clues": {"type": "array"},
+    "npcs": {"type": "array"},
+    "hypotheses": {"type": "array"},
+    "endings": {"type": "array"},
+    "items": {"type": "array"},
+    "event_log": {"type": "array"},
+    "game_over": {"type": "boolean"},
+    "ai_enabled": {"type": "boolean"}
+  },
+  "required": ["state_version", "player"]
+}

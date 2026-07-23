@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Dark Mystical Theme — Grey Fog (灰雾调查录)
+   ============================================================ */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-mystic-bg text-mystic-text font-sans;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #16213e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #0f3460;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c9a95c;
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(201, 169, 92, 0.3);
+    color: #e8d48b;
+  }
+}
+
+@layer components {
+  /* Card styling */
+  .card {
+    @apply bg-mystic-surface border border-mystic-card rounded-lg p-4;
+  }
+
+  .card-accent {
+    @apply border-mystic-accent/30;
+  }
+
+  /* Button base */
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors duration-150 cursor-pointer text-sm;
+  }
+
+  .btn-primary {
+    @apply btn bg-mystic-accent text-mystic-bg hover:bg-mystic-accent-dim;
+  }
+
+  .btn-secondary {
+    @apply btn bg-mystic-card text-mystic-text hover:bg-mystic-accent/20 border border-mystic-accent/30;
+  }
+
+  .btn-danger {
+    @apply btn bg-mystic-danger/20 text-red-400 hover:bg-mystic-danger/40 border border-mystic-danger/30;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-mystic-text-dim hover:text-mystic-text hover:bg-white/5;
+  }
+
+  .btn:disabled {
+    @apply opacity-40 cursor-not-allowed;
+  }
+
+  /* Input */
+  .input {
+    @apply bg-mystic-bg border border-mystic-card rounded-md px-3 py-2 text-mystic-text 
+           focus:outline-none focus:border-mystic-accent focus:ring-1 focus:ring-mystic-accent/50 w-full;
+  }
+
+  /* Mystical divider */
+  .divider {
+    @apply border-t border-mystic-card/60 my-3;
+  }
+
+  /* Status bar */
+  .status-bar {
+    @apply h-2 rounded-full bg-mystic-bg overflow-hidden;
+  }
+
+  .status-fill {
+    @apply h-full rounded-full transition-all duration-300;
+  }
+
+  /* Log entry */
+  .log-entry {
+    @apply border-l-2 pl-3 py-1 text-sm;
+  }
+
+  .log-entry-info {
+    @apply log-entry border-mystic-text-dim text-mystic-text-dim;
+  }
+
+  .log-entry-discovery {
+    @apply log-entry border-mystic-accent text-mystic-accent;
+  }
+
+  .log-entry-dialogue {
+    @apply log-entry border-blue-400 text-blue-300;
+  }
+
+  .log-entry-ritual {
+    @apply log-entry border-purple-500 text-purple-300;
+  }
+
+  .log-entry-combat {
+    @apply log-entry border-red-500 text-red-300;
+  }
+
+  .log-entry-system {
+    @apply log-entry border-green-600 text-green-400;
+  }
+
+  /* Hypothesis card status */
+  .hypothesis-locked {
+    @apply opacity-40;
+  }
+
+  .hypothesis-unlocked {
+    @apply border-mystic-accent/40;
+  }
+
+  .hypothesis-confirmed {
+    @apply border-green-600 bg-green-900/10;
+  }
+
+  .hypothesis-refuted {
+    @apply border-red-600 bg-red-900/10;
+  }
+}
+
+/* Animation for loading dots */
+@keyframes pulse-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+.loading-dots::after {
+  content: "";
+  animation: pulse-dot 1.4s infinite;
+}
+
+/* Mobile bottom nav safe area */
+.mobile-nav-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

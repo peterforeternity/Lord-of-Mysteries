@@ -19,17 +19,23 @@ htmlcov/
 # Build artifacts
 build/
 dist/
-*.egg-info/
 
-# macOS
-.DS_Store
-*.swp
-*.swo
+# Runtime data (SQLite saves)
+data/
+
+# Frontend
+node_modules/
+apps/web/dist/
 
 # IDE
 .idea/
 .vscode/
+*.swp
+*.swo
 *.iml
+
+# macOS
+.DS_Store
 
 # Environment files
 .env
@@ -39,5 +45,14 @@ dist/
 # Generated files
 docs/openapi.json
 
+# Playwright test artifacts
+test-results/
+
+# Unreal Engine (paused)
+unreal/
+
 # Logs
 *.log
+
+# Package artifacts
+*.egg-info/
