@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import uuid
 from typing import Any
 
@@ -12,6 +13,7 @@ from .game_manager import GameManager
 from .logging import RequestTimer, log_event
 from .models import (
     ERROR_GAME_ALREADY_FINISHED,
+    ERROR_IDEMPOTENCY_CONFLICT,
     ERROR_INTERNAL,
     ERROR_INVALID_TARGET,
     ERROR_SESSION_NOT_FOUND,
@@ -236,6 +238,68 @@ async def handle_action(
         )
         raise HTTPException(404, detail=error_resp.model_dump())
 
+    # ------------------------------------------------------------------
+    # Idempotency check
+    # ------------------------------------------------------------------
+    idempotency_key = action.idempotency_key or ""
+    action_fp: str | None = None
+    cache_key: str | None = None
+    if idempotency_key:
+        cache_key = f"{save_id}:{idempotency_key}"
+        action_fp = json.dumps(
+            {
+                "action_type": action.action_type.value,
+                "target_id": action.target_id,
+                "parameters": action.parameters,
+            },
+            sort_keys=True,
+            ensure_ascii=False,
+        )
+        cached = manager.db.get_idempotency_result(cache_key)
+        if cached is not None:
+            if cached["action_fingerprint"] == action_fp:
+                cached_resp = json.loads(cached["response_json"])
+                log_event(
+                    level="INFO",
+                    request_id=request_id,
+                    session_id=session_id,
+                    route=f"/v1/game/{save_id}/action",
+                    method="POST",
+                    status_code=200,
+                    duration_ms=timer.elapsed_ms(),
+                    action_type=action.action_type.value,
+                    target_id=action.target_id,
+                    state_version=cached_resp.get("state_version", 0),
+                    message=f"Idempotency hit for key {idempotency_key}",
+                )
+                return ActionResponse(**cached_resp)
+            else:
+                log_event(
+                    level="WARNING",
+                    request_id=request_id,
+                    session_id=session_id,
+                    route=f"/v1/game/{save_id}/action",
+                    method="POST",
+                    status_code=200,
+                    duration_ms=timer.elapsed_ms(),
+                    action_type=action.action_type.value,
+                    target_id=action.target_id,
+                    state_version=session.state_version,
+                    error_code=ERROR_IDEMPOTENCY_CONFLICT,
+                    message=f"Idempotency key conflict: {idempotency_key}",
+                )
+                return ActionResponse(
+                    success=False,
+                    state_version=session.state_version,
+                    events=[],
+                    view=None,
+                    error_code=ERROR_IDEMPOTENCY_CONFLICT,
+                    error_detail="幂等键冲突：相同的 idempotency_key 但不同的请求内容",
+                    request_id=request_id,
+                    recoverable=False,
+                    recovery=None,
+                )
+
     success, error_code, events, ending_id = session.execute_action(action)
     view = session._make_view() if success else None
 
@@ -249,6 +313,28 @@ async def handle_action(
     recovery: RecoveryInfo | None = None
     if recoverable:
         recovery = RecoveryInfo(refresh_view=True, latest_state_version=session.state_version)
+
+    response_data = ActionResponse(
+        success=success,
+        state_version=session.state_version,
+        events=events,
+        view=view,
+        error_code=error_code,
+        error_detail=None,
+        request_id=request_id,
+        recoverable=recoverable,
+        recovery=recovery,
+    )
+
+    # Cache successful response for idempotency
+    if cache_key is not None and action_fp is not None and success:
+        resp_json = json.dumps(response_data.model_dump(mode="json"), ensure_ascii=False)
+        manager.db.set_idempotency_result(
+            cache_key=cache_key,
+            action_fingerprint=action_fp,
+            response_json=resp_json,
+            ttl_seconds=30,
+        )
 
     log_event(
         level="INFO" if success else "WARNING",
@@ -265,17 +351,7 @@ async def handle_action(
         message=f"Action {action.action_type.value}: {'success' if success else 'failed'}",
     )
 
-    return ActionResponse(
-        success=success,
-        state_version=session.state_version,
-        events=events,
-        view=view,
-        error_code=error_code,
-        error_detail=None,
-        request_id=request_id,
-        recoverable=recoverable,
-        recovery=recovery,
-    )
+    return response_data
 
 
 @router.get("/v1/game/{save_id}/view", response_model=GameView)

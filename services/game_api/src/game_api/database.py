@@ -44,6 +44,14 @@ class GameDatabase:
                         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
                     );
                     CREATE INDEX IF NOT EXISTS idx_saves_case ON saves(case_id);
+                    CREATE TABLE IF NOT EXISTS idempotency_results (
+                        cache_key TEXT PRIMARY KEY,
+                        action_fingerprint TEXT NOT NULL,
+                        response_json TEXT NOT NULL,
+                        expires_at TEXT NOT NULL
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_idempotency_expires
+                        ON idempotency_results(expires_at);
                 """)
                 conn.commit()
             finally:
@@ -112,6 +120,49 @@ class GameDatabase:
                         "ORDER BY updated_at DESC"
                     ).fetchall()
                 return [dict(r) for r in rows]
+            finally:
+                conn.close()
+
+    def get_idempotency_result(self, cache_key: str) -> dict[str, Any] | None:
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                row = conn.execute(
+                    "SELECT * FROM idempotency_results WHERE cache_key = ? AND expires_at > datetime('now')",
+                    (cache_key,),
+                ).fetchone()
+                if row is None:
+                    return None
+                return dict(row)
+            finally:
+                conn.close()
+
+    def set_idempotency_result(
+        self,
+        cache_key: str,
+        action_fingerprint: str,
+        response_json: str,
+        ttl_seconds: int = 30,
+    ) -> None:
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                conn.execute(
+                    """INSERT OR REPLACE INTO idempotency_results
+                       (cache_key, action_fingerprint, response_json, expires_at)
+                       VALUES (?, ?, ?, datetime('now', '+' || ? || ' seconds'))""",
+                    (cache_key, action_fingerprint, response_json, ttl_seconds),
+                )
+                conn.commit()
+            finally:
+                conn.close()
+
+    def clean_expired_idempotency(self) -> None:
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                conn.execute("DELETE FROM idempotency_results WHERE expires_at <= datetime('now')")
+                conn.commit()
             finally:
                 conn.close()
 

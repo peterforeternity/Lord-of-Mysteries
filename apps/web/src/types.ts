@@ -153,6 +153,12 @@ export interface ActionRequest {
   expected_version: number;
 }
 
+/** Recovery hint returned with recoverable errors */
+export interface RecoveryInfo {
+  refresh_view: boolean;
+  latest_state_version: number;
+}
+
 /** Action response */
 export interface ActionResponse {
   success: boolean;
@@ -161,6 +167,9 @@ export interface ActionResponse {
   view: GameView | null;
   error_code: string | null;
   error_detail: string | null;
+  request_id?: string;
+  recoverable?: boolean;
+  recovery?: RecoveryInfo | null;
 }
 
 /** Save/Load response */

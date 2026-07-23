@@ -1,0 +1,1587 @@
+[
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.728874998865649,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.0338750036899,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.2016250004526228,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9772500090766698,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.8485000036889687,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6936250030994415,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.8859999981941655,
+    "success": true,
+    "action_type": "talk",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.6249590009683743,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.1235419990262017,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6625839925836772,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.931541996076703,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9492910068947822,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.7494579951744527,
+    "success": true,
+    "action_type": "talk",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6633750055916607,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/save",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 6.664999993517995,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/load",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 10.335416998714209,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7796659958548844,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.0640830043703318,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.0014579931739718,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.561583009082824,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.0781659986823797,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.034082994214259,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.11650000710506,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.372500006458722,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.5028749951161444,
+    "success": true,
+    "action_type": "perform_divination",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.971875001094304,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/save",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 3.8404579972848296,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.1120839955983683,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7149589984910563,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.4119169936748222,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6747080080676824,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.9782090093940496,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.5559160092379898,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.9319159910082817,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.8193750001955777,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.027166003244929,
+    "success": true,
+    "action_type": "talk",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.8918329917360097,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.1776249923277646,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6513339942321181,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.7329999973298982,
+    "success": true,
+    "action_type": "talk",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.5740419912617654,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.7651249945629388,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7253749974770471,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6786670021247119,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.122375008184463,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.9312080112285912,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7847910057753325,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.8121249886462465,
+    "success": true,
+    "action_type": "use_spirit_vision",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.668791999691166,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.002124994760379,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9282080029370263,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.9040000042878091,
+    "success": false,
+    "action_type": "perform_ritual",
+    "error_code": "TARGET_NOT_AVAILABLE"
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9865420035785064,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.1445830061566085,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.2813749965280294,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.307875009137206,
+    "success": true,
+    "action_type": "talk",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.145499995094724,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.6070409949170426,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.6226250047329813,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.625500008231029,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6534169990336522,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.9708330073626712,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.8118330044671893,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.9780000002356246,
+    "success": true,
+    "action_type": "rest",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.004458990995772,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 14.265542005887255,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.8252910085720941,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.7469159938627854,
+    "success": true,
+    "action_type": "talk",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6317080007866025,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/save",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 3.9319170027738437,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.229874997283332,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6747080080676824,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.8282500095665455,
+    "success": true,
+    "action_type": "use_spirit_vision",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.5972919936757535,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.8159999890485778,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7138749972218648,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.658499997574836,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.8115840066457167,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.8043340096483007,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.667166012339294,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.967249991139397,
+    "success": true,
+    "action_type": "talk",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.8751669995253906,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 3.369374986505136,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.0212499948684126,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.924750002217479,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.636000000871718,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.8917080014944077,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7292499978793785,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 6.887291005114093,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.1246249962132424,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 1.9418339943513274,
+    "success": true,
+    "action_type": "talk",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.714292011456564,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.3190409992821515,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 3.452624994679354,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.7410830080043525,
+    "success": true,
+    "action_type": "use_spirit_vision",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.2917079913895577,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 3.3010830084094778,
+    "success": true,
+    "action_type": "perform_divination",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.1727910061599687,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.680750006926246,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.030625008046627,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.093250004691072,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.85070899897255,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.4156659928848967,
+    "success": true,
+    "action_type": "talk",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6237499949056655,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 13.7402920081513,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.6164589944528416,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.017707985942252,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.8939999863505363,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.0313330023782328,
+    "success": true,
+    "action_type": "rest",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.401249992544763,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.611250001587905,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.5064159999601543,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.3267919896170497,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.033166994806379,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 3.0700000061187893,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.271707999170758,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.3777500027790666,
+    "success": true,
+    "action_type": "use_spirit_vision",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9611669995356351,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 3.2182079885387793,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 3.441957989707589,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 3.1108330003917217,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 12.35933299176395,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 4.919459010125138,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 4.437041992787272,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 3.5130000032950193,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 5.142416994203813,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.6493750046938658,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 3.455458994721994,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 3.239833007683046,
+    "success": true,
+    "action_type": "travel",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.856082996004261,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/action",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 2.2629579907516018,
+    "success": true,
+    "action_type": "inspect",
+    "error_code": null
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.976167011889629,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/save",
+    "method": "POST",
+    "status": 200,
+    "duration_ms": 4.084083004272543,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.2650419996352866,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.843582998844795,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.156332993763499,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.8074169968022034,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.315042002010159,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.0430830045370385,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9071249989792705,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.5964579943101853,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.039333005086519,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.5652499860152602,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9037919992115349,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 3.0011250055395067,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 6.835167005192488,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.479165996192023,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.2486669913632795,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9444170029601082,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 10.855415996047668,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.788374996976927,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.93162499635946,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.2264580038608983,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.682749996893108,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.208374993642792,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.2366670018527657,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9994580070488155,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 3.5726250061998144,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 4.179416995611973,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 4.65279100171756,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 4.204666998703033,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.358915997319855,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.3242499883053824,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.0002920064143836,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7728750099195167,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 3.0822499975329265,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6481249913340434,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.5916250015143305,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.3847500124247745,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.4594590067863464,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.0983750000596046,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9495839951559901,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.4764590052654967,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.5080000050365925,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.0996670064050704,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.865124999312684,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.4627920027123764,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.688042000751011,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.0235839911038056,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7260839958908036,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.478125006542541,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.061874998616986,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6886669909581542,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.897499998449348,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.339041002211161,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.8391659978078678,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.5343749983003363,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9222090049879625,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 3.1047919910633937,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 3.0097920098342,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.5755839995108545,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.1607090020552278,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.3885840016882867,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7305000073974952,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.2858749978477135,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.845332997618243,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.4327499957289547,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.484917000401765,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.6715420060791075,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.347959001781419,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.2513329895446077,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 2.0784169901162386,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.8139580060960725,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.9975839968537912,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7908750014612451,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.8010000057984143,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.3757919950876385,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 3.70437499077525,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.7849589930847287,
+    "success": true
+  },
+  {
+    "route": "/v1/game/{save_id}/view",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.826708990847692,
+    "success": true
+  },
+  {
+    "route": "/v1/health",
+    "method": "GET",
+    "status": 200,
+    "duration_ms": 1.564249992952682,
+    "success": true
+  }
+]

@@ -21,6 +21,7 @@ ERROR_RESOURCE_INSUFFICIENT = "RESOURCE_INSUFFICIENT"
 ERROR_GAME_ALREADY_FINISHED = "GAME_ALREADY_FINISHED"
 ERROR_SESSION_NOT_FOUND = "SESSION_NOT_FOUND"
 ERROR_RATE_LIMITED = "RATE_LIMITED"
+ERROR_IDEMPOTENCY_CONFLICT = "IDEMPOTENCY_CONFLICT"
 ERROR_INTERNAL = "INTERNAL_ERROR"
 
 
@@ -58,6 +59,7 @@ class GameAction(BaseModel):
     target_id: str = ""
     parameters: dict[str, Any] = Field(default_factory=dict)
     expected_version: int = 0
+    idempotency_key: str = ""
 
 
 class RecoveryInfo(BaseModel):
