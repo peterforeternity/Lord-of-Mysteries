@@ -112,6 +112,7 @@ const mockGameView: GameView = {
   ],
   game_over: false,
   final_ending: null,
+  investigation_progress: null,
   ai_enabled: true,
 };
 

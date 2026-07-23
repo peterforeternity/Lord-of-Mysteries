@@ -37,6 +37,7 @@ class GameDatabase:
                         seed INTEGER NOT NULL DEFAULT 0,
                         state_version INTEGER NOT NULL DEFAULT 0,
                         game_over INTEGER NOT NULL DEFAULT 0,
+                        resolution_notified INTEGER NOT NULL DEFAULT 0,
                         player_state TEXT NOT NULL,
                         event_log TEXT NOT NULL DEFAULT '[]',
                         view_cache TEXT,
@@ -67,6 +68,7 @@ class GameDatabase:
         player_state_json: str,
         event_log_json: str,
         view_cache: str | None = None,
+        resolution_notified: bool = False,
     ) -> None:
         with self._lock:
             conn = self._get_conn()
@@ -74,14 +76,15 @@ class GameDatabase:
                 conn.execute(
                     """INSERT OR REPLACE INTO saves
                        (save_id, case_id, seed, state_version, game_over,
-                        player_state, event_log, view_cache, updated_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))""",
+                        resolution_notified, player_state, event_log, view_cache, updated_at)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))""",
                     (
                         save_id,
                         case_id,
                         seed,
                         state_version,
                         1 if game_over else 0,
+                        1 if resolution_notified else 0,
                         player_state_json,
                         event_log_json,
                         view_cache,

@@ -106,6 +106,26 @@ export interface ActionInfo {
   parameters_schema: Record<string, unknown>;
 }
 
+/** Status of a single evidence dimension */
+export interface EvidenceDimension {
+  dimension_id: string;
+  label: string;
+  total: number;
+  found: number;
+  status_label: string;
+}
+
+/** Safe investigation progress summary */
+export interface InvestigationProgress {
+  phase_level: number;
+  phase_label: string;
+  evidence_dimensions: EvidenceDimension[];
+  recent_discoveries: string[];
+  open_questions: string[];
+  resolution_available: boolean;
+  new_resolution_available: boolean;
+}
+
 /** Full game state view returned by the API */
 export interface GameView {
   state_version: number;
@@ -120,6 +140,7 @@ export interface GameView {
   items: ItemInfo[];
   rituals: RitualInfo[];
   event_log: EventLogEntry[];
+  investigation_progress: InvestigationProgress | null;
   game_over: boolean;
   final_ending: EndingInfo | null;
   ai_enabled: boolean;

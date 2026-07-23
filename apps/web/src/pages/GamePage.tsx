@@ -7,6 +7,7 @@ import ClueList from "../components/ClueList";
 import EventLog from "../components/EventLog";
 import HypothesisPanel from "../components/HypothesisPanel";
 import NpcDialogue from "../components/NpcDialogue";
+import InvestigationProgressModal from "../components/InvestigationProgressModal";
 import type { ClueInfo, NpcInfo, ActionInfo } from "../types";
 
 export default function GamePage() {
@@ -23,6 +24,51 @@ export default function GamePage() {
   } = useGameStore();
   const [dialogueNpc, setDialogueNpc] = useState<NpcInfo | null>(null);
   const [selectedClue, setSelectedClue] = useState<ClueInfo | null>(null);
+  const [showProgress, setShowProgress] = useState(false);
+  const [showResolutionHint, setShowResolutionHint] = useState(false);
+
+  // A8: Show resolution hint when new_resolution_available is true
+  useEffect(() => {
+    if (view?.investigation_progress?.new_resolution_available) {
+      setShowResolutionHint(true);
+    }
+  }, [view?.investigation_progress?.new_resolution_available]);
+
+  // Dismiss resolution hint and mark it as seen
+  const handleDismissResolution = useCallback(async () => {
+    setShowResolutionHint(false);
+    if (view) {
+      // Find the dismiss action if available
+      const dismissAction = view.available_actions.find(
+        (a) => a.action_type === "dismiss_resolution_hint"
+      );
+      if (dismissAction) {
+        await executeAction(
+          {
+            action_type: dismissAction.action_type,
+            target_id: dismissAction.target_id ?? undefined,
+            expected_version: dismissAction.expected_version,
+          },
+          dismissAction.action_id
+        );
+      } else {
+        // Fallback: call dismiss directly via the API
+        await executeAction(
+          {
+            action_type: "dismiss_resolution_hint",
+            expected_version: view.state_version,
+          }
+        );
+      }
+    }
+  }, [view, executeAction]);
+
+  // Handle "进入推理" from progress modal
+  const handleGoToDeduction = useCallback(() => {
+    setShowProgress(false);
+    setShowResolutionHint(false);
+    navigate("/deduction");
+  }, [navigate]);
 
   // A7: Navigation state machine — redirect based on game state
   useEffect(() => {
@@ -254,6 +300,12 @@ export default function GamePage() {
         {/* Sidebar Navigation */}
         <div className="space-y-2">
           <button
+            onClick={() => setShowProgress(true)}
+            className="btn-secondary w-full text-sm"
+          >
+            调查进度
+          </button>
+          <button
             onClick={() => navigate("/deduction")}
             className="btn-secondary w-full text-sm"
           >
@@ -327,6 +379,60 @@ export default function GamePage() {
                 className="btn-primary w-full"
               >
                 关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========== Investigation Progress Modal ========== */}
+      {showProgress && view?.investigation_progress && (
+        <InvestigationProgressModal
+          progress={view.investigation_progress}
+          onClose={() => setShowProgress(false)}
+          onGoToDeduction={handleGoToDeduction}
+        />
+      )}
+
+      {/* ========== Resolution Hint Toast ========== */}
+      {showResolutionHint && view?.investigation_progress?.resolution_available && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50 cursor-pointer"
+            onClick={handleDismissResolution}
+            aria-hidden="true"
+          />
+          <div
+            className="relative z-10 bg-mystic-surface border border-mystic-gold/40 rounded-lg
+              w-full max-w-sm p-5 shadow-2xl shadow-black/50
+              motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="resolution-hint-title"
+          >
+            <h3
+              id="resolution-hint-title"
+              className="text-mystic-gold font-bold text-sm mb-3 tracking-wider"
+            >
+              新的判断正在形成
+            </h3>
+            <p className="text-mystic-text text-sm leading-relaxed mb-4">
+              你掌握的证据已经足以支持某种解释，可以进入推理，也可以继续调查。
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDismissResolution}
+                className="flex-1 btn-secondary text-sm
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mystic-gold/50"
+              >
+                继续调查
+              </button>
+              <button
+                onClick={handleGoToDeduction}
+                className="flex-1 btn-primary text-sm
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mystic-gold/50"
+              >
+                进入推理
               </button>
             </div>
           </div>
