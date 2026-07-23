@@ -1,23 +1,28 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useGameStore } from "../store";
 
 export default function EndingPage() {
   const navigate = useNavigate();
-  const { view, saveId, loading, fetchView } = useGameStore();
+  const [searchParams] = useSearchParams();
+  const { view, saveId, loading, fetchView, loadGame } = useGameStore();
 
+  // On mount, if save_id is in URL params and store is empty, load it
   useEffect(() => {
+    const urlSaveId = searchParams.get("save_id");
     if (view) return;
-    if (saveId && !loading) {
+    if (urlSaveId && !saveId && !loading) {
+      loadGame(urlSaveId);
+    } else if (saveId && !loading && !view) {
       fetchView();
     }
-  }, [view, saveId, loading, fetchView]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!view && !loading && !saveId) {
+    if (!view && !loading && !saveId && !searchParams.get("save_id")) {
       navigate("/");
     }
-  }, [view, navigate, loading, saveId]);
+  }, [view, navigate, loading, saveId, searchParams]);
 
   if (!view || !view.game_over) {
     return (

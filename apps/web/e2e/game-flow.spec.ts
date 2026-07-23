@@ -194,18 +194,8 @@ test.describe("Text Game MVP E2E", () => {
     expect(result.success).toBe(true);
     expect(result.view?.game_over).toBe(true);
 
-    // Navigate to ending page (full page reload — store gets wiped)
-    await page.goto("/ending");
-    // Set saveId so EndingPage auto-fetches view via fetchView()
-    await page.evaluate(
-      (sid) => {
-        const store = (window as any).__ZUSTAND_STORE__;
-        if (store) {
-          store.setState({ saveId: sid, loading: false });
-        }
-      },
-      sid
-    );
+    // Navigate to ending page with save_id in URL params
+    await page.goto("/ending?save_id=" + sid);
     await page.waitForTimeout(3000);
 
     // Should see ending info
@@ -247,18 +237,8 @@ test.describe("Text Game MVP E2E", () => {
 
     expect(result.success).toBe(true);
 
-    // Navigate to ending page (full page reload — store gets wiped)
-    await page.goto("/ending");
-    // Set saveId so EndingPage auto-fetches view
-    await page.evaluate(
-      (sid) => {
-        const store = (window as any).__ZUSTAND_STORE__;
-        if (store) {
-          store.setState({ saveId: sid, loading: false });
-        }
-      },
-      sid
-    );
+    // Navigate to ending page with save_id in URL params
+    await page.goto("/ending?save_id=" + sid);
     await page.waitForTimeout(3000);
 
     const bodyText2 = await page.textContent("body");
@@ -297,16 +277,9 @@ test.describe("Text Game MVP E2E", () => {
       r = await apiAction(page, sid, "perform_ritual", "ritual_purification");
     }
 
-    // Shared helper to set saveId after full page navigation to /ending
+    // Helper to navigate to ending with save_id URL param
     async function gotoEnding() {
-      await page.goto("/ending");
-      await page.evaluate(
-        (s) => {
-          const store = (window as any).__ZUSTAND_STORE__;
-          if (store) store.setState({ saveId: s, loading: false });
-        },
-        sid
-      );
+      await page.goto("/ending?save_id=" + sid);
       await page.waitForTimeout(3000);
     }
 
@@ -464,14 +437,7 @@ test.describe("Text Game MVP E2E", () => {
       );
       // Should reach some ending
       if (hypoResult.view?.game_over) {
-        await page.goto("/ending");
-        await page.evaluate(
-          (s) => {
-            const store = (window as any).__ZUSTAND_STORE__;
-            if (store) store.setState({ saveId: s, loading: false });
-          },
-          sid
-        );
+        await page.goto("/ending?save_id=" + sid);
         await page.waitForTimeout(3000);
       }
     }
