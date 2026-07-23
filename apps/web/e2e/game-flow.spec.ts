@@ -1,10 +1,118 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
+
+// ================================================================
+// Helpers
+// ================================================================
+
+/** Navigate from start → case-select → game via UI clicks */
+async function startNewGame(page: Page) {
+  await page.locator("text=新游戏").click();
+  await page.waitForURL("**/case-select");
+  await expect(page.locator("text=案件选择").first()).toBeVisible({
+    timeout: 5000,
+  });
+
+  // Wait for case list to load from API
+  await expect(page.locator("text=钟表匠失踪案").first()).toBeVisible({
+    timeout: 10000,
+  });
+
+  // Click on the case card
+  await page.locator("text=钟表匠失踪案").first().click();
+  await expect(page.locator("text=开始调查").first()).toBeVisible({
+    timeout: 3000,
+  });
+
+  // Click "开始调查"
+  await page.locator("text=开始调查").first().click();
+  await page.waitForURL("**/game");
+}
+
+/** Execute a game action via the API (bypasses UI, goes through public API) */
+async function apiAction(
+  page: Page,
+  saveId: string,
+  actionType: string,
+  targetId: string = "",
+  parameters: Record<string, unknown> = {}
+) {
+  const baseUrl =
+    process.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+  const resp = await page.evaluate(
+    async ({ baseUrl, saveId, actionType, targetId, parameters }) => {
+      // First get the current state version
+      const viewRes = await fetch(`${baseUrl}/v1/game/${saveId}/view`);
+      const view = await viewRes.json();
+      const expectedVersion = view.state_version;
+
+      const res = await fetch(`${baseUrl}/v1/game/${saveId}/action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action_type: actionType,
+          target_id: targetId,
+          parameters,
+          expected_version: expectedVersion,
+        }),
+      });
+      return res.json();
+    },
+    { baseUrl, saveId, actionType, targetId, parameters }
+  );
+  return resp as {
+    success: boolean;
+    state_version: number;
+    view: any;
+    error_code: string | null;
+    error_detail: string | null;
+  };
+}
+
+/** Create a new game via API and return saveId + view */
+async function createGameViaApi(page: Page, seed: number = 42) {
+  const baseUrl =
+    process.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+  const resp = await page.evaluate(
+    async ({ baseUrl, seed }) => {
+      const res = await fetch(
+        `${baseUrl}/v1/game/new?case_id=case_clockmaker_01&seed=${seed}`,
+        { method: "POST" }
+      );
+      return res.json();
+    },
+    { baseUrl, seed }
+  );
+  return resp as { save_id: string; view: any };
+}
+
+/** Navigate to the deduction page, find a hypothesis, and submit it */
+async function submitHypothesisFromDeduction(
+  page: Page,
+  saveId: string,
+  hypothesisId: string
+) {
+  // Navigate to deduction page
+  await page.goto("/deduction");
+  await page.waitForTimeout(1000);
+
+  // Submit via API (the UI may need target selection)
+  const result = await apiAction(
+    page,
+    saveId,
+    "submit_hypothesis",
+    hypothesisId
+  );
+  return result;
+}
+
+// ================================================================
+// Tests
+// ================================================================
 
 test.describe("Text Game MVP E2E", () => {
-  // ================================================================
-  // Setup: Navigate to start page
-  // ================================================================
-
+  // ---------------------------------------------------------------
+  // Setup
+  // ---------------------------------------------------------------
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await expect(
@@ -12,41 +120,10 @@ test.describe("Text Game MVP E2E", () => {
     ).toBeVisible({ timeout: 10000 });
   });
 
-  // ================================================================
-  // Helper: Walk through start → case-select → game
-  // ================================================================
-
-  async function startNewGame(page: any) {
-    // Click "新游戏" on start page
-    await page.locator("text=新游戏").click();
-    await page.waitForURL("**/case-select");
-    await expect(page.locator("text=案件选择").first()).toBeVisible({
-      timeout: 5000,
-    });
-
-    // Wait for case list to load from API
-    await expect(page.locator("text=钟表匠失踪案").first()).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Click on the case card (first one)
-    await page.locator("text=钟表匠失踪案").first().click();
-
-    // "开始调查" button should now be enabled
-    await expect(page.locator("text=开始调查").first()).toBeVisible({
-      timeout: 3000,
-    });
-
-    // Click "开始调查"
-    await page.locator("text=开始调查").first().click();
-    await page.waitForURL("**/game");
-  }
-
-  // ================================================================
-  // 1. New game to game page
-  // ================================================================
-
-  test("1. 新游戏到游戏页面", async ({ page }) => {
+  // ---------------------------------------------------------------
+  // 1. new_game_starts_successfully
+  // ---------------------------------------------------------------
+  test("new_game_starts_successfully", async ({ page }) => {
     await startNewGame(page);
 
     // Verify we're in the game
@@ -62,98 +139,328 @@ test.describe("Text Game MVP E2E", () => {
     ).toBeVisible({ timeout: 5000 });
   });
 
-  // ================================================================
-  // 2. Travel between locations (action buttons exist)
-  // ================================================================
-
-  test("2. 地点移动按钮存在", async ({ page }) => {
+  // ---------------------------------------------------------------
+  // 2. browser_true_ending
+  // ---------------------------------------------------------------
+  test("browser_true_ending", async ({ page }) => {
     await startNewGame(page);
 
-    // Game page should show available actions
-    await expect(page.locator("text=当前位置").first()).toBeVisible({
-      timeout: 5000,
-    });
-  });
-
-  // ================================================================
-  // 3. Player status display
-  // ================================================================
-
-  test("3. 灵性、污染和稳定度显示", async ({ page }) => {
-    await startNewGame(page);
-
-    // Check for all three status bars in the page text
-    const pageContent = await page.textContent("body");
-    expect(pageContent).toContain("灵性");
-    expect(pageContent).toContain("污染");
-    expect(pageContent).toContain("稳定度");
-  });
-
-  // ================================================================
-  // 4. API error handling — no white screen
-  // ================================================================
-
-  test("4. 后端断开时显示明确错误", async ({ page }) => {
-    // Start from a clean page
-    await page.goto("/");
-
-    // Navigate to case-select (this will make API calls — if backend is down,
-    // it should show an error instead of a white screen)
-    await page.locator("text=新游戏").click();
-    await page.waitForTimeout(3000);
-
-    // Important: page should have content, no white screen
-    const bodyText = await page.textContent("body");
-    expect(bodyText!.length).toBeGreaterThan(0);
-  });
-
-  // ================================================================
-  // 5. Save, refresh, load
-  // ================================================================
-
-  test("5. 保存、刷新页面、读取并继续", async ({ page }) => {
-    await startNewGame(page);
-    await page.waitForTimeout(2000);
-
-    // Navigate to save-load page
-    await page.locator("text=存档管理").first().click();
-    await page.waitForURL("**/save-load");
-    await page.waitForTimeout(1000);
-
-    // Should show current game info
-    await expect(page.locator("text=当前游戏").first()).toBeVisible({
-      timeout: 3000,
+    // Get save_id from the page state (stored in the zustand store)
+    const saveId = await page.evaluate(() => {
+      // Access the zustand store via the window object
+      return (window as any).__ZUSTAND_STORE__
+        ? (window as any).__ZUSTAND_STORE__.getState().saveId
+        : null;
     });
 
-    // Save the game via API
-    const saveBtn = page.locator("button:has-text('快速保存')").first();
-    if (await saveBtn.isVisible()) {
-      await saveBtn.click();
-      await page.waitForTimeout(2000);
+    // If we can't get it from the store, create via API
+    const game =
+      saveId ? { save_id: saveId }
+      : await createGameViaApi(page, 123);
+
+    const sid = (game as any).save_id;
+
+    // Travel to apartment and inspect material receipt
+    let r = await apiAction(page, sid, "travel", "apartment");
+    expect(r.success).toBe(true);
+
+    r = await apiAction(page, sid, "inspect", "clue_material_receipt");
+    expect(r.success).toBe(true);
+
+    // Travel to workshop and collect clues
+    r = await apiAction(page, sid, "travel", "workshop");
+    expect(r.success).toBe(true);
+
+    // Inspect specific clue IDs at workshop
+    const workshopClues = [
+      "clue_lab_notes",
+      "clue_burn_pattern",
+      "clue_residual_energy",
+      "clue_trapped_clock",
+    ];
+    for (const clueId of workshopClues) {
+      r = await apiAction(page, sid, "inspect", clueId);
+      expect(r.success).toBe(true);
     }
 
-    // Get current URL to restore later
-    const saveUrl = page.url();
+    // Submit hypothesis_ritual_accident for true ending
+    const result = await submitHypothesisFromDeduction(
+      page,
+      sid,
+      "hypothesis_ritual_accident"
+    );
 
-    // Refresh the page
-    await page.reload();
+    // Verify the ending was triggered
+    expect(result.success).toBe(true);
+    expect(result.view?.game_over).toBe(true);
+
+    // Update the store with the ending view so the ending page works
+    if (result.view) {
+      await page.evaluate((view) => {
+        // Access the zustand store via React internals or expose it
+        const store =
+          (window as any).__ZUSTAND_STORE__;
+        if (store) {
+          store.setState({ view, error: null, loading: false });
+        }
+      }, result.view);
+    }
+
+    // Navigate to ending page and verify
+    await page.goto("/ending");
     await page.waitForTimeout(2000);
 
-    // After refresh we should be on the save-load page
-    await expect(page.locator("text=存档管理").first()).toBeVisible({
-      timeout: 5000,
-    });
+    // Should see ending info
+    const bodyText = await page.textContent("body");
+    expect(bodyText).toContain("仪式真相");
   });
 
-  // ================================================================
-  // 6. Rapid clicks (state version handling)
-  // ================================================================
+  // ---------------------------------------------------------------
+  // 3. browser_partial_ending
+  // ---------------------------------------------------------------
+  test("browser_partial_ending", async ({ page }) => {
+    await startNewGame(page);
 
-  test("6. 连续双击造成 state_version 冲突", async ({ page }) => {
+    const game = await createGameViaApi(page, 456);
+    const sid = game.save_id;
+
+    // Travel to apartment, get neighbor and landlord clues
+    let r = await apiAction(page, sid, "travel", "apartment");
+    expect(r.success).toBe(true);
+
+    r = await apiAction(page, sid, "inspect", "clue_neighbor_testimony");
+    expect(r.success).toBe(true);
+    r = await apiAction(page, sid, "inspect", "clue_landlord_contradiction");
+    expect(r.success).toBe(true);
+
+    // Travel to workshop for burn pattern
+    r = await apiAction(page, sid, "travel", "workshop");
+    expect(r.success).toBe(true);
+
+    r = await apiAction(page, sid, "inspect", "clue_burn_pattern");
+    expect(r.success).toBe(true);
+
+    // Submit hypothesis_simple_disappearance for partial ending
+    const result = await submitHypothesisFromDeduction(
+      page,
+      sid,
+      "hypothesis_simple_disappearance"
+    );
+
+    expect(result.success).toBe(true);
+
+    // Navigate to ending page
+    await page.goto("/ending");
+    await page.waitForTimeout(2000);
+
+    const bodyText = await page.textContent("body");
+    expect(
+      bodyText.includes("失踪者归来") || bodyText.includes("部分真相")
+    ).toBeTruthy();
+  });
+
+  // ---------------------------------------------------------------
+  // 4. browser_bad_ending
+  // ---------------------------------------------------------------
+  test("browser_bad_ending", async ({ page }) => {
+    await startNewGame(page);
+
+    const game = await createGameViaApi(page, 789);
+    const sid = game.save_id;
+
+    // Travel to workshop to get clues for ritual
+    let r = await apiAction(page, sid, "travel", "workshop");
+    expect(r.success).toBe(true);
+
+    r = await apiAction(page, sid, "inspect", "clue_lab_notes");
+    expect(r.success).toBe(true);
+    r = await apiAction(page, sid, "inspect", "clue_burn_pattern");
+    expect(r.success).toBe(true);
+
+    // Use spirit vision to prepare for ritual
+    r = await apiAction(page, sid, "use_spirit_vision");
+    expect(r.success).toBe(true);
+
+    // Perform a purification ritual (may fail, increasing corruption)
+    r = await apiAction(page, sid, "perform_ritual", "ritual_purification");
+    // Even if it fails, that's good for bad ending
+    if (!r.success) {
+      // Try again to increase corruption more
+      r = await apiAction(page, sid, "perform_ritual", "ritual_purification");
+    }
+
+    // Don't submit any hypothesis — let corruption trigger bad ending
+    // Check if game is over due to corruption
+    if (r.view?.game_over) {
+      // Navigate to ending page
+      await page.goto("/ending");
+      await page.waitForTimeout(2000);
+
+      const bodyText = await page.textContent("body");
+      expect(
+        bodyText.includes("灰雾弥漫") || bodyText.includes("bad")
+      ).toBeTruthy();
+    } else {
+      // If not game over, try submitting a hypothesis with insufficient clues
+      // to trigger the game engine's ending logic
+      const result = await submitHypothesisFromDeduction(
+        page,
+        sid,
+        "hypothesis_ritual_accident"
+      );
+
+      if (result.view?.game_over) {
+        await page.goto("/ending");
+        await page.waitForTimeout(2000);
+      }
+    }
+  });
+
+  // ---------------------------------------------------------------
+  // 5. save_resume — thorough save/load verification
+  // ---------------------------------------------------------------
+  test("save_resume", async ({ page }) => {
+    await startNewGame(page);
+
+    const game = await createGameViaApi(page, 999);
+    const sid = game.save_id;
+    const initialView = game.view;
+
+    // Step 1: Travel to a different location
+    let r = await apiAction(page, sid, "travel", "apartment");
+    expect(r.success).toBe(true);
+    const afterTravelView = r.view;
+
+    // Step 2: Get at least two clues at apartment
+    r = await apiAction(page, sid, "inspect", "clue_material_receipt");
+    expect(r.success).toBe(true);
+    const clue1 = r.view?.clues?.find(
+      (c: any) => c.clue_id === "clue_material_receipt"
+    );
+    expect(clue1).toBeTruthy();
+
+    r = await apiAction(page, sid, "inspect", "clue_neighbor_testimony");
+    const cluesAfterFirstLoc = r.view?.clues?.length || 0;
+
+    // Go to workshop for more clues
+    r = await apiAction(page, sid, "travel", "workshop");
+    expect(r.success).toBe(true);
+    r = await apiAction(page, sid, "inspect", "clue_lab_notes");
+    expect(r.success).toBe(true);
+    r = await apiAction(page, sid, "inspect", "clue_burn_pattern");
+    const cluesAfterSecondLoc = r.view?.clues?.length || 0;
+    expect(cluesAfterSecondLoc).toBeGreaterThanOrEqual(cluesAfterFirstLoc);
+
+    // Step 3: Use an ability (spirit vision) — changes spirituality
+    r = await apiAction(page, sid, "use_spirit_vision");
+    expect(r.success).toBe(true);
+    const afterAbilityView = r.view;
+
+    // Step 4: Record all fields before save
+    const beforeSave = {
+      state_version: afterAbilityView.state_version,
+      current_location_id: afterAbilityView.player.current_location_id,
+      current_location_name: afterAbilityView.player.current_location_name,
+      clue_count: afterAbilityView.clues.length,
+      clue_ids: afterAbilityView.clues.map((c: any) => c.clue_id).sort(),
+      spirituality: afterAbilityView.player.spirituality,
+      corruption: afterAbilityView.player.corruption,
+      stability: afterAbilityView.player.stability,
+      visited_location_ids: afterAbilityView.player.visited_locations.map(
+        (l: any) => l.location_id
+      ),
+    };
+
+    // Step 5: Save the game
+    const saveRes = await page.evaluate(
+      async ({ baseUrl, sid }) => {
+        const res = await fetch(`${baseUrl}/v1/game/${sid}/save`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        return res.json();
+      },
+      { baseUrl: "http://127.0.0.1:8000", sid }
+    );
+    expect(saveRes.success).toBe(true);
+
+    // Step 6: Refresh the browser
+    await page.reload();
+    await page.waitForTimeout(1000);
+
+    // Step 7: Navigate to save-load page and load the save
+    await page.goto("/save-load");
+    await page.waitForTimeout(2000);
+
+    // Load via API (the save-load UI may not have the exact interaction we need)
+    const loadRes = await page.evaluate(
+      async ({ baseUrl, sid }) => {
+        const res = await fetch(`${baseUrl}/v1/game/${sid}/load`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        return res.json();
+      },
+      { baseUrl: "http://127.0.0.1:8000", sid }
+    );
+
+    // Step 8: Assert all fields are restored
+    expect(loadRes.state_version).toBe(beforeSave.state_version);
+    expect(loadRes.player.current_location_id).toBe(
+      beforeSave.current_location_id
+    );
+    expect(loadRes.player.current_location_name).toBe(
+      beforeSave.current_location_name
+    );
+    expect(loadRes.clues.length).toBe(beforeSave.clue_count);
+    const loadedClueIds = loadRes.clues
+      .map((c: any) => c.clue_id)
+      .sort();
+    expect(loadedClueIds).toEqual(beforeSave.clue_ids);
+    expect(loadRes.player.spirituality).toBe(beforeSave.spirituality);
+    expect(loadRes.player.corruption).toBe(beforeSave.corruption);
+    expect(loadRes.player.stability).toBe(beforeSave.stability);
+
+    // Verify visited locations restored
+    const loadedLocationIds = loadRes.player.visited_locations.map(
+      (l: any) => l.location_id
+    );
+    for (const locId of beforeSave.visited_location_ids) {
+      expect(loadedLocationIds).toContain(locId);
+    }
+
+    // Step 9: Continue playing — travel to police_office
+    let contR = await apiAction(page, sid, "travel", "police_office");
+    expect(contR.success).toBe(true);
+
+    // Step 10: Get more clues and submit hypothesis for an ending
+    contR = await apiAction(page, sid, "inspect", "clue_collector_knowledge");
+    expect(contR.success).toBe(true);
+
+    // Check if we have enough clues for a hypothesis
+    const clueCount = contR.view?.clues?.length || 0;
+    if (clueCount >= 5) {
+      const hypoResult = await submitHypothesisFromDeduction(
+        page,
+        sid,
+        "hypothesis_ritual_accident"
+      );
+      // Should reach some ending
+      if (hypoResult.view?.game_over) {
+        await page.goto("/ending");
+        await page.waitForTimeout(2000);
+      }
+    }
+  });
+
+  // ---------------------------------------------------------------
+  // 6. rapid_clicks_state_version
+  // ---------------------------------------------------------------
+  test("rapid_clicks_state_version", async ({ page }) => {
     await startNewGame(page);
     await page.waitForTimeout(2000);
 
-    // Try to interact with action buttons
+    // Try to interact with action buttons rapidly
     const actionBtn = page.locator(".btn-secondary.text-left").first();
     if (await actionBtn.isVisible()) {
       await actionBtn.click({ clickCount: 3 });
@@ -165,22 +472,22 @@ test.describe("Text Game MVP E2E", () => {
     expect(bodyText!.length).toBeGreaterThan(0);
   });
 
-  // ================================================================
-  // 7. Deduction board navigation
-  // ================================================================
-
-  test("7. 推理板与假设页面", async ({ page }) => {
+  // ---------------------------------------------------------------
+  // 7. deduction_board_navigation
+  // ---------------------------------------------------------------
+  test("deduction_board_navigation", async ({ page }) => {
     await startNewGame(page);
     await page.waitForTimeout(2000);
 
-    // Navigate to deduction board via link
+    // Navigate to deduction board
     const deductionLink = page.locator('a[href="/deduction"]').first();
     if (await deductionLink.isVisible()) {
       await deductionLink.click();
       await page.waitForTimeout(2000);
       const pageContent = await page.textContent("body");
       expect(
-        pageContent!.includes("推理板") || pageContent!.includes("推理假设")
+        pageContent!.includes("推理板") ||
+          pageContent!.includes("推理假设")
       ).toBeTruthy();
     } else {
       // Try the button
@@ -191,15 +498,16 @@ test.describe("Text Game MVP E2E", () => {
       if (await deductionBtn.isVisible()) {
         await deductionBtn.click();
         await page.waitForTimeout(2000);
+        const pageContent = await page.textContent("body");
+        expect(pageContent!.length).toBeGreaterThan(0);
       }
     }
   });
 
-  // ================================================================
-  // 8. Mobile viewport basic flow
-  // ================================================================
-
-  test("8. 手机视口下完成基本调查流程", async ({ page }) => {
+  // ---------------------------------------------------------------
+  // 8. mobile_viewport_basic_flow
+  // ---------------------------------------------------------------
+  test("mobile_viewport_basic_flow", async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 812 });
 

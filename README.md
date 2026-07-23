@@ -5,8 +5,14 @@ High-density investigation RPG — headless core, AI dialogue gateway, and brows
 ## Quick Start
 
 ```bash
+# Quick dev start (both Game API + Frontend)
+bash scripts/dev_text_game.sh
+
+# Or start manually:
+
 # Install dependencies
 uv sync
+cd apps/web && npm ci && cd ..
 
 # Run all Python checks
 uv run ruff check .
@@ -18,13 +24,13 @@ uv run pytest --cov --cov-report=term-missing --cov-fail-under=90
 uv run python tools/run_playthrough.py --all
 
 # Start Game API (text game backend)
-uv run uvicorn game_api.main:app --port 8001
+uv run uvicorn game_api.main:app --host 127.0.0.1 --port 8000
 
-# Start AI Gateway
-uv run uvicorn ai_gateway.main:app --port 8000
+# Start AI Gateway (if needed, disabled by default in MVP)
+uv run uvicorn ai_gateway.main:app --host 127.0.0.1 --port 8001
 
 # Start Frontend (in another terminal)
-cd apps/web && npm install && npm run dev
+cd apps/web && VITE_API_BASE_URL=http://127.0.0.1:8000 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
 ## Text Game MVP
