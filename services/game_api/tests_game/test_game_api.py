@@ -359,7 +359,7 @@ def test_all_endings_reachable(client: TestClient, playthrough_dir: Path):
 
     case_root = playthrough_dir.parent
     loader = CaseLoader(case_root)
-    case = loader.load_case()
+    loader.load_case()
 
     playthrough_files = sorted(playthrough_dir.glob("*.json"))
     passed = 0
@@ -369,7 +369,7 @@ def test_all_endings_reachable(client: TestClient, playthrough_dir: Path):
         with open(pf) as f:
             config = json.load(f)
 
-        playthrough_id = config.get("id", pf.stem)
+        config.get("id", pf.stem)
         seed = config.get("seed", 0)
         actions = config["actions"]
         expected_ending_id = config.get("expected_ending_id", "")

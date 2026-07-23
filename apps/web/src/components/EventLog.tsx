@@ -5,8 +5,8 @@ interface Props {
   entries: EventLogEntry[];
 }
 
-function entryClass(type: EventLogEntry["type"]): string {
-  switch (type) {
+function entryClass(eventType: string): string {
+  switch (eventType) {
     case "info":
       return "log-entry-info";
     case "discovery":
@@ -19,6 +19,8 @@ function entryClass(type: EventLogEntry["type"]): string {
       return "log-entry-combat";
     case "system":
       return "log-entry-system";
+    default:
+      return "log-entry-info";
   }
 }
 
@@ -39,7 +41,7 @@ export default function EventLog({ entries }: Props) {
       ) : (
         <div className="space-y-1">
           {entries.map((entry) => (
-            <div key={entry.id} className={entryClass(entry.type)}>
+            <div key={entry.event_id} className={entryClass(entry.event_type)}>
               <div className="flex items-start gap-2">
                 <span className="text-mystic-text-dim text-[10px] shrink-0 mt-0.5">
                   {new Date(entry.timestamp).toLocaleTimeString("zh-CN", {
@@ -47,7 +49,7 @@ export default function EventLog({ entries }: Props) {
                     minute: "2-digit",
                   })}
                 </span>
-                <span className="text-xs">{entry.content}</span>
+                <span className="text-xs">{entry.description}</span>
               </div>
             </div>
           ))}

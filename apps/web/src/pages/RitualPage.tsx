@@ -4,7 +4,7 @@ import { useGameStore } from "../store";
 
 export default function RitualPage() {
   const navigate = useNavigate();
-  const { view, executeAction, loading } = useGameStore();
+  const { view, executeAction, loading, error } = useGameStore();
   const [selectedRitual, setSelectedRitual] = useState<string | null>(null);
 
   if (!view) {
@@ -18,7 +18,10 @@ export default function RitualPage() {
   const rituals = view.rituals || [];
 
   const handlePerformRitual = async (ritualId: string) => {
-    await executeAction("perform_ritual", { ritual_id: ritualId });
+    await executeAction({
+      action_type: "perform_ritual",
+      target_id: ritualId,
+    });
     setSelectedRitual(null);
   };
 
@@ -36,8 +39,7 @@ export default function RitualPage() {
       {/* Spirituality warning */}
       <div className="card border-purple-800/30 bg-purple-900/5 mb-6">
         <p className="text-sm text-purple-300">
-          灵性：{view.player_status.spirituality}/
-          {view.player_status.max_spirituality}
+          灵性：{view.player.spirituality}
         </p>
         <p className="text-xs text-purple-400/60 mt-1">
           进行仪式将消耗灵性，请谨慎选择
@@ -54,23 +56,23 @@ export default function RitualPage() {
         <div className="grid gap-4 md:grid-cols-2">
           {rituals.map((ritual) => (
             <div
-              key={ritual.id}
+              key={ritual.ritual_id}
               className={`card ${
-                selectedRitual === ritual.id
+                selectedRitual === ritual.ritual_id
                   ? "border-purple-500 bg-purple-900/10"
                   : "hover:border-purple-800/40"
-              } ${!ritual.is_available ? "opacity-50" : ""}`}
+              } ${!ritual.can_perform ? "opacity-50" : ""}`}
             >
               <div className="flex items-start justify-between mb-2">
                 <h3 className="text-mystic-gold font-bold">{ritual.name}</h3>
-                {!ritual.is_available && (
+                {!ritual.can_perform && (
                   <span className="text-xs text-mystic-text-dim bg-mystic-card px-2 py-0.5 rounded">
                     不可用
                   </span>
                 )}
               </div>
               <p className="text-mystic-text-dim text-sm mb-3">
-                {ritual.description}
+                {ritual.purpose}
               </p>
 
               {/* Required materials */}
@@ -79,29 +81,22 @@ export default function RitualPage() {
                   所需材料
                 </h4>
                 <ul className="space-y-1">
-                  {ritual.required_materials.map((mat) => (
+                  {ritual.required_materials.map((mat, idx) => (
                     <li
-                      key={mat.item_id}
-                      className={`text-xs flex items-center justify-between ${
-                        mat.has_enough
-                          ? "text-green-400"
-                          : "text-red-400"
-                      }`}
+                      key={idx}
+                      className="text-xs text-mystic-text-dim"
                     >
-                      <span>
-                        {mat.item_name} x{mat.quantity}
-                      </span>
-                      <span>{mat.has_enough ? "✓" : "✗"}</span>
+                      {mat}
                     </li>
                   ))}
                 </ul>
               </div>
 
               <button
-                onClick={() => handlePerformRitual(ritual.id)}
-                disabled={!ritual.is_available || loading}
+                onClick={() => handlePerformRitual(ritual.ritual_id)}
+                disabled={!ritual.can_perform || loading}
                 className={`btn w-full text-sm ${
-                  ritual.is_available
+                  ritual.can_perform
                     ? "bg-purple-700 text-white hover:bg-purple-600"
                     : "btn-secondary opacity-50"
                 }`}
@@ -110,6 +105,13 @@ export default function RitualPage() {
               </button>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="card border-red-800 bg-red-900/10 mt-4">
+          <p className="text-red-400 text-sm">{error}</p>
         </div>
       )}
 

@@ -69,36 +69,16 @@ export default function CaseSelectPage() {
               selectedCase === c.case_id
                 ? "border-mystic-accent bg-mystic-accent/5"
                 : "hover:border-mystic-accent/40"
-            } ${!c.is_available ? "opacity-50" : ""}`}
-            disabled={!c.is_available}
+            }`}
           >
             <div className="flex items-start justify-between mb-2">
               <h3 className="text-mystic-gold font-bold">{c.title}</h3>
-              {!c.is_available && (
-                <span className="text-xs text-mystic-text-dim bg-mystic-card px-2 py-0.5 rounded">
-                  未开放
-                </span>
-              )}
             </div>
             <p className="text-mystic-text-dim text-sm mb-3">
               {c.description}
             </p>
             <div className="flex items-center gap-3 text-xs text-mystic-text-dim">
-              <span>
-                难度：{" "}
-                <span
-                  className={
-                    c.difficulty === "简单"
-                      ? "text-green-400"
-                      : c.difficulty === "中等"
-                      ? "text-yellow-400"
-                      : "text-red-400"
-                  }
-                >
-                  {c.difficulty}
-                </span>
-              </span>
-              <span>预计：{c.estimated_hours}</span>
+              <span>版本 {c.version}</span>
             </div>
           </button>
         ))}

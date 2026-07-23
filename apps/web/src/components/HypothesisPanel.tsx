@@ -1,10 +1,10 @@
-import type { Hypothesis } from "../types";
+import type { HypothesisInfo } from "../types";
 
 interface Props {
-  hypotheses: Hypothesis[];
+  hypotheses: HypothesisInfo[];
 }
 
-function statusBadge(status: Hypothesis["status"]) {
+function statusBadge(status: HypothesisInfo["status"]) {
   switch (status) {
     case "locked":
       return { label: "未解锁", className: "bg-gray-700 text-gray-400" };
@@ -14,6 +14,8 @@ function statusBadge(status: Hypothesis["status"]) {
       return { label: "已确认", className: "bg-green-900/30 text-green-400" };
     case "refuted":
       return { label: "已推翻", className: "bg-red-900/30 text-red-400" };
+    default:
+      return { label: status, className: "bg-gray-700 text-gray-400" };
   }
 }
 
@@ -37,9 +39,13 @@ export default function HypothesisPanel({ hypotheses }: Props) {
       <div className="space-y-2">
         {hypotheses.map((h) => {
           const badge = statusBadge(h.status);
+          const progress =
+            h.required_clue_count > 0
+              ? Math.round((h.found_clue_count / h.required_clue_count) * 100)
+              : 0;
           return (
             <div
-              key={h.id}
+              key={h.hypothesis_id}
               className={`rounded p-3 border text-sm ${
                 h.status === "confirmed"
                   ? "hypothesis-confirmed"
@@ -69,13 +75,19 @@ export default function HypothesisPanel({ hypotheses }: Props) {
                     <div className="status-bar flex-1">
                       <div
                         className="status-fill bg-mystic-accent"
-                        style={{ width: `${h.progress}%` }}
+                        style={{ width: `${progress}%` }}
                       />
                     </div>
                     <span className="text-xs text-mystic-text-dim">
-                      {h.progress}%
+                      {progress}%
                     </span>
                   </div>
+                  <span className="text-xs text-mystic-text-dim">
+                    线索 {h.found_clue_count}/{h.required_clue_count}
+                    {h.can_submit && (
+                      <span className="text-mystic-accent ml-2">可提交</span>
+                    )}
+                  </span>
                 </>
               )}
             </div>

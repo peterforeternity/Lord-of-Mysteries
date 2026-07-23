@@ -357,7 +357,7 @@ class GameSession:
 
             elif action.action_type == ActionType.TALK:
                 npc_id = action.target_id or action.parameters.get("npc_id", "")
-                claim_id = action.parameters.get("claim_id", "")
+                action.parameters.get("claim_id", "")
                 if npc_id:
                     claims = self.sm.get_npc_claims(npc_id)
                     for c in claims:
@@ -373,7 +373,7 @@ class GameSession:
                     )
 
             elif action.action_type == ActionType.USE_SPIRIT_VISION:
-                target_id = action.target_id or action.parameters.get("target_id", "")
+                action.target_id or action.parameters.get("target_id", "")
                 if self.sm.player_state.spirituality < 1:
                     return False, "INSUFFICIENT_SPIRITUALITY", [], None
                 self.sm.player_state.spirituality = max(0, self.sm.player_state.spirituality - 1)
@@ -381,18 +381,21 @@ class GameSession:
                 if event_id not in self.sm.player_state.completed_events:
                     self.sm.player_state.completed_events.append(event_id)
                 # Check for spirit vision clue
-                for c in self.sm.case.clues:
-                    if c.requires_any_tags and "evt_spirit_vision" in c.requires_any_tags:
-                        if c.clue_id not in self.sm.player_state.discovered_clue_ids:
-                            success, event = self.sm.discover_clue(c.clue_id)
-                            if success and event:
-                                events.append(
-                                    {
-                                        "event_type": "clue_discovered",
-                                        "description": event.description,
-                                        "involved_clue_ids": [c.clue_id],
-                                    }
-                                )
+                for clue in self.sm.case.clues:
+                    if (
+                        clue.requires_any_tags
+                        and "evt_spirit_vision" in clue.requires_any_tags
+                        and clue.clue_id not in self.sm.player_state.discovered_clue_ids
+                    ):
+                        success, event = self.sm.discover_clue(clue.clue_id)
+                        if success and event:
+                            events.append(
+                                {
+                                    "event_type": "clue_discovered",
+                                    "description": event.description,
+                                    "involved_clue_ids": [clue.clue_id],
+                                }
+                            )
                 self.state_version += 1
                 events.append(
                     {
@@ -477,7 +480,6 @@ class GameSession:
                             )
                     return True, None, events, ending_id
                 else:
-                    reason = event.description if event else "条件不满足"
                     return False, "HYPOTHESIS_FAILED", [], None
 
             elif action.action_type == ActionType.REST:
@@ -551,18 +553,12 @@ class GameSession:
 
         # Restore player state
         player_raw = data.get("player_state", "{}")
-        if isinstance(player_raw, str):
-            player_dict = json.loads(player_raw)
-        else:
-            player_dict = player_raw
+        player_dict = json.loads(player_raw) if isinstance(player_raw, str) else player_raw
         session.sm.player_state = PlayerCaseState(**player_dict)
 
         # Restore event log
         log_raw = data.get("event_log", "[]")
-        if isinstance(log_raw, str):
-            log_list = json.loads(log_raw)
-        else:
-            log_list = log_raw
+        log_list = json.loads(log_raw) if isinstance(log_raw, str) else log_raw
         session.sm.event_log.clear()
         for e_data in log_list:
             session.sm.event_log.add_event(CaseEvent(**e_data))
@@ -693,10 +689,7 @@ class GameManager:
             player_dict = player_state_str
 
         event_log_str = row["event_log"]
-        if isinstance(event_log_str, str):
-            log_list = json.loads(event_log_str)
-        else:
-            log_list = event_log_str
+        log_list = json.loads(event_log_str) if isinstance(event_log_str, str) else event_log_str
 
         sm.player_state = PlayerCaseState(**player_dict)
         sm.player_state.seed = row.get("seed", 0)

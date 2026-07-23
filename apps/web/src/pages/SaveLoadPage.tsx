@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGameStore } from "../store";
-import { loadGame, newGame } from "../api";
 import type { SaveSlot } from "../types";
 
 // Mock save slots for demo — in production these come from the backend
@@ -44,7 +43,7 @@ export default function SaveLoadPage() {
         <div className="card card-accent mb-6">
           <h3 className="text-mystic-gold font-bold mb-1">当前游戏</h3>
           <p className="text-sm text-mystic-text-dim">
-            {view.case_name} — {view.chapter}
+            {view.current_scene} — {view.player.current_location_name}
           </p>
           <p className="text-xs text-mystic-text-dim/50 mt-1">
             存档ID: {saveId}
@@ -108,19 +107,18 @@ export default function SaveLoadPage() {
         <div className="space-y-2">
           {slots.map((slot) => (
             <div
-              key={slot.slot_id}
+              key={slot.save_id}
               className="card flex items-center justify-between"
             >
               <div>
                 <p className="text-sm text-mystic-text font-medium">
-                  {slot.case_name}
+                  {slot.case_id}
                 </p>
                 <p className="text-xs text-mystic-text-dim">
-                  {slot.chapter} — {slot.location}
+                  版本 {slot.state_version}
                 </p>
                 <p className="text-xs text-mystic-text-dim/50">
-                  {new Date(slot.saved_at).toLocaleString("zh-CN")} · 游戏时长{" "}
-                  {slot.play_time}
+                  {new Date(slot.created_at).toLocaleString("zh-CN")}
                 </p>
               </div>
               <button

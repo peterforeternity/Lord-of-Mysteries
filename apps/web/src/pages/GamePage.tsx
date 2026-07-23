@@ -7,14 +7,14 @@ import ClueList from "../components/ClueList";
 import EventLog from "../components/EventLog";
 import HypothesisPanel from "../components/HypothesisPanel";
 import NpcDialogue from "../components/NpcDialogue";
-import type { Clue, Npc, Action } from "../types";
+import type { ClueInfo, NpcInfo } from "../types";
 
 export default function GamePage() {
   const navigate = useNavigate();
   const { view, loading, error, executeAction, fetchView, saveGame } =
     useGameStore();
-  const [dialogueNpc, setDialogueNpc] = useState<Npc | null>(null);
-  const [selectedClue, setSelectedClue] = useState<Clue | null>(null);
+  const [dialogueNpc, setDialogueNpc] = useState<NpcInfo | null>(null);
+  const [selectedClue, setSelectedClue] = useState<ClueInfo | null>(null);
 
   useEffect(() => {
     if (!view) {
@@ -30,23 +30,31 @@ export default function GamePage() {
     );
   }
 
-  const handleAction = (action: Action) => {
-    executeAction(action.id);
+  const handleAction = (actionType: string) => {
+    executeAction({ action_type: actionType });
   };
 
   const handleSave = async () => {
     await saveGame();
   };
 
+  const currentLocation = view.player.current_location_name;
+  const visitedLocations = view.player.visited_locations;
+  const currentLocationInfo = visitedLocations.find(
+    (l) => l.location_id === view.player.current_location_id
+  );
+
   return (
     <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 lg:p-6 max-w-7xl mx-auto w-full">
       {/* ========== LEFT COLUMN ========== */}
       <aside className="lg:w-72 shrink-0 hidden lg:block">
-        <PlayerStatus status={view.player_status} />
-        <LocationPanel
-          currentLocation={view.current_location}
-          locations={view.locations}
-        />
+        <PlayerStatus status={view.player} />
+        {currentLocationInfo && (
+          <LocationPanel
+            currentLocation={currentLocationInfo}
+            locations={visitedLocations}
+          />
+        )}
 
         {/* Items */}
         <div className="card card-accent mb-4">
@@ -61,17 +69,10 @@ export default function GamePage() {
             <ul className="space-y-1">
               {view.items.map((item) => (
                 <li
-                  key={item.id}
+                  key={item.item_id}
                   className="text-xs text-mystic-text flex items-center justify-between py-1 px-2 rounded hover:bg-white/5"
                 >
-                  <span>
-                    {item.name}
-                    {item.quantity > 1 && (
-                      <span className="text-mystic-text-dim ml-1">
-                        x{item.quantity}
-                      </span>
-                    )}
-                  </span>
+                  <span>{item.name}</span>
                 </li>
               ))}
             </ul>
@@ -85,40 +86,16 @@ export default function GamePage() {
         <div className="card card-accent mb-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-mystic-gold font-bold">
-              {view.scene_name}
+              {view.current_scene}
             </h3>
             <span className="text-xs text-mystic-text-dim">
-              {view.chapter}
+              {currentLocation}
             </span>
           </div>
           <p className="text-sm text-mystic-text leading-relaxed">
-            {view.scene_description}
+            {view.current_description}
           </p>
         </div>
-
-        {/* Dialogue */}
-        {view.dialogue_content && (
-          <div className="card border-blue-800/50 bg-blue-900/5 mb-4">
-            <p className="text-sm text-blue-200 leading-relaxed italic">
-              {view.dialogue_content}
-            </p>
-            {view.dialogue_options.length > 0 && (
-              <div className="mt-3 space-y-1">
-                {view.dialogue_options.map((opt, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() =>
-                      executeAction("dialogue_choice", { choice: idx })
-                    }
-                    className="btn-secondary w-full text-left text-xs"
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Actions */}
         <div className="card mb-4">
@@ -128,17 +105,12 @@ export default function GamePage() {
           <div className="grid gap-2 sm:grid-cols-2">
             {view.available_actions.map((action) => (
               <button
-                key={action.id}
+                key={action}
                 onClick={() => handleAction(action)}
                 disabled={loading}
                 className="btn-secondary text-left text-sm"
               >
-                <span className="font-medium">{action.name}</span>
-                {action.description && (
-                  <span className="block text-mystic-text-dim text-xs mt-0.5">
-                    {action.description}
-                  </span>
-                )}
+                <span className="font-medium">{action}</span>
               </button>
             ))}
             {view.available_actions.length === 0 && (
@@ -151,7 +123,7 @@ export default function GamePage() {
 
         {/* Mobile: Player Status (visible only on mobile) */}
         <div className="lg:hidden mb-4">
-          <PlayerStatus status={view.player_status} />
+          <PlayerStatus status={view.player} />
         </div>
 
         {/* Mobile: Clues */}
@@ -168,7 +140,7 @@ export default function GamePage() {
             <div className="flex flex-wrap gap-2">
               {view.npcs.map((npc) => (
                 <button
-                  key={npc.id}
+                  key={npc.npc_id}
                   onClick={() => setDialogueNpc(npc)}
                   className="btn-secondary text-xs"
                 >
@@ -196,75 +168,26 @@ export default function GamePage() {
 
       {/* ========== RIGHT COLUMN ========== */}
       <aside className="lg:w-80 shrink-0 hidden lg:block">
-        {/* Active Tasks */}
-        <div className="card card-accent mb-4">
-          <h3 className="text-mystic-gold text-sm font-bold mb-3 tracking-wider">
-            当前任务
-          </h3>
-          {view.active_tasks.length === 0 ? (
-            <p className="text-mystic-text-dim text-xs italic">
-              暂无活跃任务
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {view.active_tasks.map((task) => (
-                <li key={task.id} className="text-xs">
-                  <div className="flex items-start gap-2">
-                    <span
-                      className={`mt-0.5 shrink-0 ${
-                        task.status === "completed"
-                          ? "text-green-400"
-                          : task.status === "failed"
-                          ? "text-red-400"
-                          : "text-mystic-gold"
-                      }`}
-                    >
-                      {task.status === "completed"
-                        ? "✓"
-                        : task.status === "failed"
-                        ? "✗"
-                        : "○"}
-                    </span>
-                    <div>
-                      <p
-                        className={`${
-                          task.status === "completed"
-                            ? "text-green-400 line-through"
-                            : task.status === "failed"
-                            ? "text-red-400"
-                            : "text-mystic-text"
-                        }`}
-                      >
-                        {task.title}
-                      </p>
-                      <p className="text-mystic-text-dim mt-0.5">
-                        {task.description}
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
         {/* Clue List */}
         <ClueList clues={view.clues} onClueClick={setSelectedClue} />
 
-        {/* Investigations / Divination */}
-        {view.divination_results.length > 0 && (
+        {/* NPCs in sidebar */}
+        {view.npcs.length > 0 && (
           <div className="card mb-4">
             <h3 className="text-mystic-gold text-sm font-bold mb-3 tracking-wider">
-              占卜结果
+              NPC
             </h3>
-            {view.divination_results.map((dr) => (
-              <div key={dr.id} className="mb-2 last:mb-0">
-                <p className="text-xs text-mystic-gold">{dr.content}</p>
-                <p className="text-xs text-mystic-text-dim mt-0.5">
-                  {dr.interpretation}
-                </p>
-              </div>
-            ))}
+            <div className="flex flex-wrap gap-2">
+              {view.npcs.map((npc) => (
+                <button
+                  key={npc.npc_id}
+                  onClick={() => setDialogueNpc(npc)}
+                  className="btn-secondary text-xs"
+                >
+                  {npc.name}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -318,7 +241,7 @@ export default function GamePage() {
           <div className="bg-mystic-surface border border-mystic-card rounded-lg w-full max-w-md">
             <div className="flex items-center justify-between p-4 border-b border-mystic-card">
               <h2 className="text-mystic-gold font-bold">
-                {selectedClue.name}
+                {selectedClue.display_name}
               </h2>
               <button
                 onClick={() => setSelectedClue(null)}
@@ -332,15 +255,9 @@ export default function GamePage() {
                 {selectedClue.description}
               </p>
               <div className="text-xs text-mystic-text-dim space-y-1">
-                <p>来源：{selectedClue.source}</p>
-                <p>
-                  发现时间：
-                  {new Date(selectedClue.discovered_at).toLocaleString(
-                    "zh-CN"
-                  )}
-                </p>
-                {selectedClue.is_key && (
-                  <p className="text-mystic-accent">关键线索</p>
+                <p>来源：{selectedClue.source_type}</p>
+                {selectedClue.is_new && (
+                  <p className="text-mystic-accent">新发现的线索</p>
                 )}
               </div>
             </div>

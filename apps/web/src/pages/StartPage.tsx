@@ -52,7 +52,7 @@ export default function StartPage() {
         {/* Theme atmosphere */}
         <div className="divider" />
         <p className="text-mystic-text-dim/40 text-xs italic">
-          "在每一片灰雾之后，都藏着一个不愿被述说的真相。"
+          &ldquo;在每一片灰雾之后，都藏着一个不愿被述说的真相。&rdquo;
         </p>
 
         {/* Developer mode badge */}

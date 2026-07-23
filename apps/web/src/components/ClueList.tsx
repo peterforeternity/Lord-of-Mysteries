@@ -1,8 +1,8 @@
-import type { Clue } from "../types";
+import type { ClueInfo } from "../types";
 
 interface Props {
-  clues: Clue[];
-  onClueClick?: (clue: Clue) => void;
+  clues: ClueInfo[];
+  onClueClick?: (clue: ClueInfo) => void;
 }
 
 export default function ClueList({ clues, onClueClick }: Props) {
@@ -19,42 +19,42 @@ export default function ClueList({ clues, onClueClick }: Props) {
     );
   }
 
-  const keyClues = clues.filter((c) => c.is_key);
-  const normalClues = clues.filter((c) => !c.is_key);
+  const newClues = clues.filter((c) => c.is_new);
+  const oldClues = clues.filter((c) => !c.is_new);
 
   return (
     <div className="card mb-4">
       <h3 className="text-mystic-gold text-sm font-bold mb-3 tracking-wider">
         线索记录 ({clues.length})
       </h3>
-      {keyClues.length > 0 && (
+      {newClues.length > 0 && (
         <div className="mb-3">
           <h4 className="text-mystic-accent text-xs font-bold mb-1">
-            关键线索
+            新发现
           </h4>
-          {keyClues.map((clue) => (
+          {newClues.map((clue) => (
             <button
-              key={clue.id}
+              key={clue.clue_id}
               onClick={() => onClueClick?.(clue)}
               className="block w-full text-left text-xs py-1.5 px-2 rounded 
                          bg-mystic-accent/10 text-mystic-gold hover:bg-mystic-accent/20
                          mb-1 transition-colors border border-mystic-accent/20"
             >
-              {clue.name}
+              {clue.display_name}
             </button>
           ))}
         </div>
       )}
       <h4 className="text-mystic-text-dim text-xs font-bold mb-1">其他线索</h4>
-      {normalClues.map((clue) => (
+      {oldClues.map((clue) => (
         <button
-          key={clue.id}
+          key={clue.clue_id}
           onClick={() => onClueClick?.(clue)}
           className="block w-full text-left text-xs py-1.5 px-2 rounded 
                      text-mystic-text-dim hover:text-mystic-text hover:bg-white/5
                      mb-0.5 transition-colors"
         >
-          {clue.name}
+          {clue.display_name}
         </button>
       ))}
     </div>

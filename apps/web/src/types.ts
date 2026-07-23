@@ -1,142 +1,116 @@
-// ============================================================
-// Game API TypeScript Interfaces — Grey Fog (灰雾调查录)
-// ============================================================
-
-/** Player status values */
+/** Player resource status */
 export interface PlayerStatus {
   spirituality: number;
   corruption: number;
   stability: number;
-  max_spirituality: number;
-  max_corruption: number;
-  max_stability: number;
+  current_location_id: string;
+  current_location_name: string;
+  visited_locations: LocationInfo[];
 }
 
-/** An item in the player's inventory */
-export interface Item {
-  id: string;
-  name: string;
-  description: string;
-  quantity: number;
-  usable: boolean;
-}
-
-/** A location in the game world */
-export interface Location {
-  id: string;
-  name: string;
+/** Location info */
+export interface LocationInfo {
+  location_id: string;
+  display_name: string;
   description: string;
   is_current: boolean;
-  is_visited: boolean;
-  available_actions: Action[];
+  has_been_visited: boolean;
+  available_clues: ClueInfo[];
+  available_npcs: string[];
 }
 
-/** An action the player can take */
-export interface Action {
-  id: string;
+/** Clue info */
+export interface ClueInfo {
+  clue_id: string;
+  display_name: string;
+  description: string;
+  source_type: string;
+  is_new: boolean;
+}
+
+/** NPC info */
+export interface NpcInfo {
+  npc_id: string;
   name: string;
   description: string;
-  action_type: string;
-  requires_item?: string;
-  requires_condition?: string;
+  emotion: string;
+  current_location_id: string;
+  available_claims: ClaimInfo[];
 }
 
-/** A clue discovered during investigation */
-export interface Clue {
-  id: string;
-  name: string;
-  description: string;
-  source: string;
-  discovered_at: string;
-  is_key: boolean;
+/** Claim info */
+export interface ClaimInfo {
+  claim_id: string;
+  content: string;
+  is_lie: boolean;
+  speaker_believes_it: boolean;
 }
 
-/** An NPC met during the game */
-export interface Npc {
-  id: string;
-  name: string;
-  description: string;
-  dialogue_available: boolean;
-  statements: string[];
-}
-
-/** A hypothesis the player can form */
-export interface Hypothesis {
-  id: string;
+/** Hypothesis info */
+export interface HypothesisInfo {
+  hypothesis_id: string;
   title: string;
   description: string;
-  status: "locked" | "unlocked" | "confirmed" | "refuted";
-  required_clues: string[];
-  progress: number;
+  status: string;
+  min_confidence: number;
+  required_clue_count: number;
+  found_clue_count: number;
+  can_submit: boolean;
 }
 
-/** A task or objective */
-export interface Task {
-  id: string;
+/** Ending info */
+export interface EndingInfo {
+  ending_id: string;
   title: string;
   description: string;
-  status: "active" | "completed" | "failed";
+  ending_type: string;
 }
 
-/** A ritual template */
-export interface Ritual {
-  id: string;
-  name: string;
-  description: string;
-  required_materials: RitualMaterial[];
-  is_available: boolean;
-}
-
-/** Material required for a ritual */
-export interface RitualMaterial {
+/** Item info */
+export interface ItemInfo {
   item_id: string;
-  item_name: string;
-  quantity: number;
-  has_enough: boolean;
+  name: string;
+  description: string;
+  active_ability: string;
+  holding_cost: string;
 }
 
-/** A single event log entry */
+/** Ritual info */
+export interface RitualInfo {
+  ritual_id: string;
+  name: string;
+  purpose: string;
+  required_materials: string[];
+  space_condition: string;
+  steps: string[];
+  can_perform: boolean;
+}
+
+/** Event log entry */
 export interface EventLogEntry {
-  id: string;
+  event_id: string;
+  event_type: string;
+  description: string;
   timestamp: string;
-  type: "info" | "discovery" | "dialogue" | "ritual" | "combat" | "system";
-  content: string;
 }
 
-/** Divination result */
-export interface DivinationResult {
-  id: string;
-  content: string;
-  interpretation: string;
-  potency: number;
-}
-
-/** Full game view returned by the API */
+/** Full game state view returned by the API */
 export interface GameView {
-  save_id: string;
-  case_id: string;
-  case_name: string;
-  chapter: string;
-  scene_id: string;
-  scene_name: string;
-  scene_description: string;
-  player_status: PlayerStatus;
-  locations: Location[];
-  current_location: Location;
-  items: Item[];
-  clues: Clue[];
-  npcs: Npc[];
-  hypotheses: Hypothesis[];
-  active_tasks: Task[];
-  available_actions: Action[];
+  state_version: number;
+  player: PlayerStatus;
+  current_scene: string;
+  current_description: string;
+  available_actions: string[];
+  clues: ClueInfo[];
+  npcs: NpcInfo[];
+  hypotheses: HypothesisInfo[];
+  endings: EndingInfo[];
+  items: ItemInfo[];
+  rituals: RitualInfo[];
   event_log: EventLogEntry[];
-  dialogue_content: string | null;
-  dialogue_options: string[];
-  rituals: Ritual[];
-  divination_results: DivinationResult[];
-  is_game_over: boolean;
-  ending_type: string | null;
-  ending_description: string | null;
+  game_over: boolean;
+  final_ending: EndingInfo | null;
+  ai_enabled: boolean;
 }
 
 /** Case metadata */
@@ -144,9 +118,7 @@ export interface CaseMeta {
   case_id: string;
   title: string;
   description: string;
-  difficulty: string;
-  estimated_hours: string;
-  is_available: boolean;
+  version: string;
 }
 
 /** Case list response */
@@ -154,50 +126,43 @@ export interface CaseListResponse {
   cases: CaseMeta[];
 }
 
-/** New game request */
-export interface NewGameRequest {
-  case_id: string;
-  player_name?: string;
-}
-
 /** New game response */
 export interface NewGameResponse {
   save_id: string;
+  case_id: string;
   view: GameView;
 }
 
 /** Action request */
 export interface ActionRequest {
-  action_id: string;
+  action_type: string;
+  target_id?: string;
   parameters?: Record<string, unknown>;
+  expected_version: number;
 }
 
 /** Action response */
 export interface ActionResponse {
-  view: GameView;
-  message: string;
+  success: boolean;
+  state_version: number;
+  events: Array<{ event_type: string; description: string }>;
+  view: GameView | null;
+  error_code: string | null;
+  error_detail: string | null;
 }
 
-/** Save response */
+/** Save/Load response */
 export interface SaveResponse {
   success: boolean;
   save_id: string;
-  saved_at: string;
-}
-
-/** Load response */
-export interface LoadResponse {
-  success: boolean;
-  view: GameView;
 }
 
 /** Save slot metadata */
 export interface SaveSlot {
-  slot_id: string;
   save_id: string;
-  case_name: string;
-  chapter: string;
-  location: string;
-  saved_at: string;
-  play_time: string;
+  case_id: string;
+  state_version: number;
+  game_over: number;
+  created_at: string;
+  updated_at: string;
 }

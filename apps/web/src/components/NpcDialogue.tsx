@@ -1,7 +1,7 @@
-import type { Npc } from "../types";
+import type { NpcInfo } from "../types";
 
 interface Props {
-  npc: Npc;
+  npc: NpcInfo;
   onClose: () => void;
 }
 
@@ -11,7 +11,10 @@ export default function NpcDialogue({ npc, onClose }: Props) {
       <div className="bg-mystic-surface border border-mystic-card rounded-lg w-full max-w-lg max-h-[80vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-mystic-card">
-          <h2 className="text-mystic-gold font-bold">{npc.name}</h2>
+          <div>
+            <h2 className="text-mystic-gold font-bold">{npc.name}</h2>
+            <span className="text-mystic-text-dim text-xs">{npc.emotion}</span>
+          </div>
           <button
             onClick={onClose}
             className="text-mystic-text-dim hover:text-mystic-text text-lg leading-none"
@@ -25,23 +28,23 @@ export default function NpcDialogue({ npc, onClose }: Props) {
           <p className="text-mystic-text-dim text-sm">{npc.description}</p>
         </div>
 
-        {/* Statements */}
+        {/* Claims */}
         <div className="p-4">
           <h3 className="text-mystic-accent text-sm font-bold mb-3">
             证词
           </h3>
-          {npc.statements.length === 0 ? (
+          {npc.available_claims.length === 0 ? (
             <p className="text-mystic-text-dim text-xs italic">
               暂无证词记录
             </p>
           ) : (
             <ul className="space-y-3">
-              {npc.statements.map((stmt, idx) => (
+              {npc.available_claims.map((claim) => (
                 <li
-                  key={idx}
+                  key={claim.claim_id}
                   className="text-sm text-mystic-text pl-3 border-l-2 border-mystic-accent/40"
                 >
-                  {stmt}
+                  {claim.content}
                 </li>
               ))}
             </ul>

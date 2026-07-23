@@ -1,10 +1,11 @@
-// ============================================================
-// Zustand Game State Store — Grey Fog (灰雾调查录)
-// ============================================================
-
 import { create } from "zustand";
-import type { GameView } from "./types";
+import type { GameView, ActionRequest } from "./types";
 import * as api from "./api";
+
+/** Action request that can omit expected_version (store fills it in) */
+export type ActionRequestInput = Omit<ActionRequest, "expected_version"> & {
+  expected_version?: number;
+};
 
 interface GameState {
   saveId: string | null;
@@ -12,8 +13,8 @@ interface GameState {
   loading: boolean;
   error: string | null;
 
-  newGame: (caseId: string) => Promise<void>;
-  executeAction: (actionId: string, params?: Record<string, unknown>) => Promise<void>;
+  newGame: (caseId: string, seed?: number) => Promise<void>;
+  executeAction: (action: ActionRequestInput) => Promise<void>;
   saveGame: () => Promise<void>;
   loadGame: (saveId: string) => Promise<void>;
   fetchView: () => Promise<void>;
@@ -28,10 +29,10 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   clearError: () => set({ error: null }),
 
-  newGame: async (caseId: string) => {
+  newGame: async (caseId: string, seed?: number) => {
     set({ loading: true, error: null });
     try {
-      const res = await api.newGame({ case_id: caseId });
+      const res = await api.newGame(caseId, seed);
       set({ saveId: res.save_id, view: res.view, loading: false });
     } catch (err) {
       set({
@@ -41,19 +42,24 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  executeAction: async (
-    actionId: string,
-    params?: Record<string, unknown>
-  ) => {
-    const { saveId } = get();
+  executeAction: async (action: ActionRequestInput) => {
+    const { saveId, view } = get();
     if (!saveId) return;
+    const actionWithVersion: ActionRequest = {
+      ...action,
+      expected_version: action.expected_version ?? (view?.state_version ?? 0),
+    } as ActionRequest;
     set({ loading: true, error: null });
     try {
-      const res = await api.executeAction(saveId, {
-        action_id: actionId,
-        parameters: params,
-      });
-      set({ view: res.view, loading: false });
+      const res = await api.executeAction(saveId, actionWithVersion);
+      if (res.success && res.view) {
+        set({ view: res.view, loading: false });
+      } else {
+        set({
+          error: res.error_detail || res.error_code || "操作失败",
+          loading: false,
+        });
+      }
     } catch (err) {
       set({
         error: err instanceof Error ? err.message : "执行操作失败",
@@ -80,8 +86,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   loadGame: async (sid: string) => {
     set({ loading: true, error: null });
     try {
-      const res = await api.loadGame(sid);
-      set({ saveId: sid, view: res.view, loading: false });
+      const view = await api.loadGame(sid);
+      set({ saveId: sid, view, loading: false });
     } catch (err) {
       set({
         error: err instanceof Error ? err.message : "加载游戏失败",

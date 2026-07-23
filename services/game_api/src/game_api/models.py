@@ -156,7 +156,14 @@ class GameView(BaseModel):
     """
 
     state_version: int
-    player: PlayerStatus = Field(default_factory=PlayerStatus)
+    player: PlayerStatus = Field(
+        default_factory=lambda: PlayerStatus(
+            spirituality=5,
+            corruption=0,
+            stability=5,
+            current_location_id="",
+        )
+    )
     current_scene: str = ""
     current_description: str = ""
     available_actions: list[str] = Field(default_factory=list)

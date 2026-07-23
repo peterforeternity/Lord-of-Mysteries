@@ -45,6 +45,12 @@ apps/web/dist/
 # Generated files
 docs/openapi.json
 
+# Playwright test artifacts
+test-results/
+
+# Unreal Engine (paused)
+unreal/
+
 # Logs
 *.log
 

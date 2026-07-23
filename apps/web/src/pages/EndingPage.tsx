@@ -12,7 +12,7 @@ export default function EndingPage() {
     }
   }, [view, navigate]);
 
-  if (!view || !view.is_game_over) {
+  if (!view || !view.game_over) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <p className="text-mystic-text-dim">案件尚未结束</p>
@@ -36,7 +36,8 @@ export default function EndingPage() {
     unknown: "text-mystic-text-dim border-mystic-card",
   };
 
-  const endingType = view.ending_type || "unknown";
+  const finalEnding = view.final_ending;
+  const endingType = finalEnding?.ending_type || "unknown";
   const typeLabel = endingTypeLabels[endingType] || "未知结局";
   const colorClass = endingTypeColors[endingType] || endingTypeColors.unknown;
 
@@ -61,7 +62,7 @@ export default function EndingPage() {
           {/* Ending Description */}
           <div className="mb-6">
             <p className="text-mystic-text text-base leading-relaxed">
-              {view.ending_description || "案件结束了，但真相究竟如何？"}
+              {finalEnding?.description || "案件结束了，但真相究竟如何？"}
             </p>
           </div>
 
@@ -71,8 +72,7 @@ export default function EndingPage() {
               案件总结
             </h3>
             <div className="text-xs text-mystic-text-dim space-y-1">
-              <p>案件：{view.case_name}</p>
-              <p>章节：{view.chapter}</p>
+              <p>场景：{view.current_scene}</p>
               <p>
                 发现线索：{view.clues.length} 条
               </p>

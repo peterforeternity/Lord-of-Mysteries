@@ -1,20 +1,13 @@
-// ============================================================
-// Game API Client — Grey Fog (灰雾调查录)
-// ============================================================
-
 import type {
-  NewGameRequest,
   NewGameResponse,
   ActionRequest,
   ActionResponse,
   GameView,
-  SaveResponse,
-  LoadResponse,
   CaseListResponse,
   CaseMeta,
 } from "./types";
 
-const BASE_URL = "http://localhost:8001";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8001";
 
 async function request<T>(
   path: string,
@@ -38,10 +31,16 @@ async function request<T>(
 }
 
 /** Create a new game */
-export async function newGame(req: NewGameRequest): Promise<NewGameResponse> {
-  return request<NewGameResponse>("/v1/game/new", {
+export async function newGame(
+  caseId: string,
+  seed?: number
+): Promise<NewGameResponse> {
+  const params = new URLSearchParams({ case_id: caseId });
+  if (seed !== undefined) {
+    params.set("seed", String(seed));
+  }
+  return request<NewGameResponse>(`/v1/game/new?${params.toString()}`, {
     method: "POST",
-    body: JSON.stringify(req),
   });
 }
 
@@ -62,15 +61,15 @@ export async function getView(saveId: string): Promise<GameView> {
 }
 
 /** Save the game */
-export async function saveGame(saveId: string): Promise<SaveResponse> {
-  return request<SaveResponse>(`/v1/game/${saveId}/save`, {
+export async function saveGame(saveId: string): Promise<{ success: boolean; save_id: string }> {
+  return request<{ success: boolean; save_id: string }>(`/v1/game/${saveId}/save`, {
     method: "POST",
   });
 }
 
 /** Load a saved game */
-export async function loadGame(saveId: string): Promise<LoadResponse> {
-  return request<LoadResponse>(`/v1/game/${saveId}/load`, {
+export async function loadGame(saveId: string): Promise<GameView> {
+  return request<GameView>(`/v1/game/${saveId}/load`, {
     method: "POST",
   });
 }
@@ -81,8 +80,6 @@ export async function listCases(): Promise<CaseListResponse> {
 }
 
 /** Get metadata for a specific case */
-export async function getCaseMeta(
-  caseId: string
-): Promise<CaseMeta> {
+export async function getCaseMeta(caseId: string): Promise<CaseMeta> {
   return request<CaseMeta>(`/v1/cases/${caseId}/metadata`);
 }

@@ -5,7 +5,8 @@ import HypothesisPanel from "../components/HypothesisPanel";
 
 export default function DeductionBoardPage() {
   const navigate = useNavigate();
-  const { view } = useGameStore();
+  const { view, executeAction, loading, error } = useGameStore();
+  const [submitting, setSubmitting] = useState<string | null>(null);
 
   if (!view) {
     return (
@@ -14,6 +15,15 @@ export default function DeductionBoardPage() {
       </div>
     );
   }
+
+  const handleSubmitHypothesis = async (hypothesisId: string) => {
+    setSubmitting(hypothesisId);
+    await executeAction({
+      action_type: "submit_hypothesis",
+      target_id: hypothesisId,
+    });
+    setSubmitting(null);
+  };
 
   return (
     <div className="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full">
@@ -28,9 +38,9 @@ export default function DeductionBoardPage() {
 
       {/* Case Info */}
       <div className="card card-accent mb-6">
-        <h3 className="text-mystic-gold font-bold mb-1">{view.case_name}</h3>
+        <h3 className="text-mystic-gold font-bold mb-1">{view.current_scene}</h3>
         <p className="text-mystic-text-dim text-xs">
-          当前章节：{view.chapter}
+          当前位置：{view.player.current_location_name}
         </p>
       </div>
 
@@ -49,20 +59,16 @@ export default function DeductionBoardPage() {
             <div className="space-y-2">
               {view.clues.map((clue) => (
                 <div
-                  key={clue.id}
-                  className={`p-3 rounded text-sm border ${
-                    clue.is_key
-                      ? "border-mystic-accent/40 bg-mystic-accent/5"
-                      : "border-mystic-card/40 bg-mystic-bg/50"
-                  }`}
+                  key={clue.clue_id}
+                  className="p-3 rounded text-sm border border-mystic-card/40 bg-mystic-bg/50"
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-medium text-mystic-text">
-                      {clue.name}
+                      {clue.display_name}
                     </span>
-                    {clue.is_key && (
+                    {clue.is_new && (
                       <span className="text-[10px] text-mystic-accent px-1.5 py-0.5 rounded bg-mystic-accent/10">
-                        关键
+                        新
                       </span>
                     )}
                   </div>
@@ -70,7 +76,7 @@ export default function DeductionBoardPage() {
                     {clue.description}
                   </p>
                   <p className="text-mystic-text-dim/50 text-[10px] mt-1">
-                    来源：{clue.source}
+                    来源：{clue.source_type}
                   </p>
                 </div>
               ))}
@@ -78,7 +84,7 @@ export default function DeductionBoardPage() {
           )}
         </div>
 
-        {/* Right Column: NPC Statements + Divination */}
+        {/* Right Column: NPC Statements */}
         <div className="space-y-6">
           {/* NPC Statements */}
           <div className="card">
@@ -92,22 +98,22 @@ export default function DeductionBoardPage() {
             ) : (
               <div className="space-y-3">
                 {view.npcs.map((npc) => (
-                  <div key={npc.id}>
+                  <div key={npc.npc_id}>
                     <h4 className="text-sm text-mystic-accent font-medium mb-1">
                       {npc.name}
                     </h4>
-                    {npc.statements.length === 0 ? (
+                    {npc.available_claims.length === 0 ? (
                       <p className="text-mystic-text-dim text-xs italic pl-3">
                         暂无证词
                       </p>
                     ) : (
                       <ul className="space-y-1">
-                        {npc.statements.map((stmt, idx) => (
+                        {npc.available_claims.map((claim) => (
                           <li
-                            key={idx}
+                            key={claim.claim_id}
                             className="text-xs text-mystic-text pl-3 border-l-2 border-mystic-card"
                           >
-                            {stmt}
+                            {claim.content}
                           </li>
                         ))}
                       </ul>
@@ -117,48 +123,55 @@ export default function DeductionBoardPage() {
               </div>
             )}
           </div>
-
-          {/* Divination Results */}
-          {view.divination_results.length > 0 && (
-            <div className="card">
-              <h3 className="text-mystic-gold text-sm font-bold mb-3 tracking-wider">
-                占卜结果
-              </h3>
-              <div className="space-y-2">
-                {view.divination_results.map((dr) => (
-                  <div key={dr.id} className="border border-purple-800/30 bg-purple-900/5 rounded p-3">
-                    <p className="text-sm text-mystic-gold mb-1">
-                      {dr.content}
-                    </p>
-                    <p className="text-xs text-mystic-text-dim">
-                      {dr.interpretation}
-                    </p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-[10px] text-mystic-text-dim">
-                        灵性强度：
-                      </span>
-                      <div className="status-bar flex-1 max-w-[100px]">
-                        <div
-                          className="status-fill bg-purple-500"
-                          style={{ width: `${dr.potency}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-mystic-text-dim">
-                        {dr.potency}%
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Hypotheses Section */}
       <div className="mt-6">
         <HypothesisPanel hypotheses={view.hypotheses} />
+
+        {/* Hypothesis Submission */}
+        {view.hypotheses.some((h) => h.can_submit) && (
+          <div className="card mt-4">
+            <h3 className="text-mystic-gold text-sm font-bold mb-3 tracking-wider">
+              提交假设
+            </h3>
+            <div className="space-y-2">
+              {view.hypotheses
+                .filter((h) => h.can_submit)
+                .map((h) => (
+                  <div
+                    key={h.hypothesis_id}
+                    className="flex items-center justify-between p-3 rounded border border-mystic-accent/30 bg-mystic-accent/5"
+                  >
+                    <div>
+                      <p className="text-sm text-mystic-text font-medium">
+                        {h.title}
+                      </p>
+                      <p className="text-xs text-mystic-text-dim">
+                        线索 {h.found_clue_count}/{h.required_clue_count}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleSubmitHypothesis(h.hypothesis_id)}
+                      disabled={loading || submitting === h.hypothesis_id}
+                      className="btn-primary text-sm"
+                    >
+                      {submitting === h.hypothesis_id ? "提交中..." : "提交"}
+                    </button>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="card border-red-800 bg-red-900/10 mt-4">
+          <p className="text-red-400 text-sm">{error}</p>
+        </div>
+      )}
 
       {/* Bottom Actions */}
       <div className="flex items-center gap-3 mt-6">
