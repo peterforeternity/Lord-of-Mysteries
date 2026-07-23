@@ -7,6 +7,22 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+# ---------------------------------------------------------------------------
+# Error codes (unified)
+# ---------------------------------------------------------------------------
+
+ERROR_INVALID_TARGET = "INVALID_TARGET"
+ERROR_TARGET_NOT_VISIBLE = "TARGET_NOT_VISIBLE"
+ERROR_TARGET_NOT_AVAILABLE = "TARGET_NOT_AVAILABLE"
+ERROR_ACTION_NOT_ALLOWED = "ACTION_NOT_ALLOWED"
+ERROR_STATE_VERSION_CONFLICT = "STATE_VERSION_CONFLICT"
+ERROR_INVALID_PARAMETERS = "INVALID_PARAMETERS"
+ERROR_RESOURCE_INSUFFICIENT = "RESOURCE_INSUFFICIENT"
+ERROR_GAME_ALREADY_FINISHED = "GAME_ALREADY_FINISHED"
+ERROR_SESSION_NOT_FOUND = "SESSION_NOT_FOUND"
+ERROR_RATE_LIMITED = "RATE_LIMITED"
+ERROR_INTERNAL = "INTERNAL_ERROR"
+
 
 class ActionType(str, Enum):
     TRAVEL = "travel"
@@ -22,6 +38,19 @@ class ActionType(str, Enum):
     LOAD = "load"
 
 
+class ActionInfo(BaseModel):
+    """Structured description of an available action for the client."""
+
+    action_id: str
+    action_type: str
+    target_id: str | None = None
+    label: str
+    enabled: bool = True
+    disabled_reason: str | None = None
+    expected_version: int = 0
+    parameters_schema: dict[str, Any] = Field(default_factory=dict)
+
+
 class GameAction(BaseModel):
     """A player action submitted to the game engine."""
 
@@ -29,6 +58,13 @@ class GameAction(BaseModel):
     target_id: str = ""
     parameters: dict[str, Any] = Field(default_factory=dict)
     expected_version: int = 0
+
+
+class RecoveryInfo(BaseModel):
+    """Recovery hint returned with recoverable errors."""
+
+    refresh_view: bool = True
+    latest_state_version: int = 0
 
 
 class ActionResponse(BaseModel):
@@ -40,6 +76,20 @@ class ActionResponse(BaseModel):
     view: GameView | None = None
     error_code: str | None = None
     error_detail: str | None = None
+    request_id: str = ""
+    recoverable: bool = True
+    recovery: RecoveryInfo | None = None
+
+
+class GameErrorResponse(BaseModel):
+    """Unified error response for non-action endpoints."""
+
+    success: bool = False
+    error_code: str
+    message: str
+    request_id: str
+    recoverable: bool = False
+    recovery: RecoveryInfo | None = None
 
 
 class ClueInfo(BaseModel):
@@ -166,7 +216,7 @@ class GameView(BaseModel):
     )
     current_scene: str = ""
     current_description: str = ""
-    available_actions: list[str] = Field(default_factory=list)
+    available_actions: list[ActionInfo] = Field(default_factory=list)
     clues: list[ClueInfo] = Field(default_factory=list)
     npcs: list[NpcInfo] = Field(default_factory=list)
     hypotheses: list[HypothesisInfo] = Field(default_factory=list)

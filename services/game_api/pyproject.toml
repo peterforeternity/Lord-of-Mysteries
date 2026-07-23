@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "game-api"
 version = "0.1.0"
-description = "Game API for Project Grey Fog text-based MVP"
+description = "Game API for 诡秘之主 text-based MVP"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.110.0",

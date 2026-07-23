@@ -94,13 +94,25 @@ export interface EventLogEntry {
   timestamp: string;
 }
 
+/** Action info returned by the backend — frontend must render from this data only */
+export interface ActionInfo {
+  action_id: string;
+  action_type: string;
+  target_id: string | null;
+  label: string;
+  enabled: boolean;
+  disabled_reason: string | null;
+  expected_version: number;
+  parameters_schema: Record<string, unknown>;
+}
+
 /** Full game state view returned by the API */
 export interface GameView {
   state_version: number;
   player: PlayerStatus;
   current_scene: string;
   current_description: string;
-  available_actions: string[];
+  available_actions: ActionInfo[];
   clues: ClueInfo[];
   npcs: NpcInfo[];
   hypotheses: HypothesisInfo[];

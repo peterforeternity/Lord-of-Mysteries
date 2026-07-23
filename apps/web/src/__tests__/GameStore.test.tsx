@@ -38,7 +38,11 @@ const mockGameView: GameView = {
   },
   current_scene: "灰雾镇的清晨",
   current_description: "灰雾笼罩着整个小镇，远处传来模糊的人声。",
-  available_actions: ["探索广场", "与路人交谈", "检查告示板"],
+  available_actions: [
+    { action_id: "act_1", action_type: "inspect", target_id: "clue_1", label: "探索广场", enabled: true, disabled_reason: null, expected_version: 0, parameters_schema: {} },
+    { action_id: "act_2", action_type: "talk", target_id: "npc_1", label: "与路人交谈", enabled: true, disabled_reason: null, expected_version: 0, parameters_schema: {} },
+    { action_id: "act_3", action_type: "inspect", target_id: "clue_2", label: "检查告示板", enabled: true, disabled_reason: null, expected_version: 0, parameters_schema: {} },
+  ],
   clues: [
     {
       clue_id: "clue_1",
@@ -217,7 +221,7 @@ describe("GameStore", () => {
     expect(api.executeAction).toHaveBeenCalledWith("save_1", {
       action_type: "探索广场",
       expected_version: 1,
-    });
+    }, "save_1");
   });
 
   // Test 7: STATE_VERSION_CONFLICT handling
@@ -261,7 +265,7 @@ describe("GameStore", () => {
       await useGameStore.getState().saveGame();
     });
 
-    expect(api.saveGame).toHaveBeenCalledWith("save_1");
+    expect(api.saveGame).toHaveBeenCalledWith("save_1", "save_1");
     expect(useGameStore.getState().loading).toBe(false);
   });
 
@@ -290,7 +294,7 @@ describe("GameStore", () => {
     expect(state.saveId).toBe("save_1");
     expect(state.view).toEqual(mockGameView);
     expect(state.loading).toBe(false);
-    expect(api.loadGame).toHaveBeenCalledWith("save_1");
+    expect(api.loadGame).toHaveBeenCalledWith("save_1", "save_1");
   });
 
   // Test 12: loadGame error
@@ -316,7 +320,7 @@ describe("GameStore", () => {
     });
 
     expect(useGameStore.getState().view).toEqual(mockGameView);
-    expect(api.getView).toHaveBeenCalledWith("save_1");
+    expect(api.getView).toHaveBeenCalledWith("save_1", "save_1");
   });
 
   // Test 14: Player status values in store

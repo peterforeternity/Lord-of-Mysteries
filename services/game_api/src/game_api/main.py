@@ -1,4 +1,4 @@
-"""Game API — FastAPI application for Project Grey Fog text-based MVP."""
+"""Game API — FastAPI application for 诡秘之主 text-based MVP."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 app = FastAPI(
-    title="Project Grey Fog - Game API",
+    title="诡秘之主 - Game API",
     version="0.1.0",
     description="Browser-based investigation text game API",
     docs_url="/docs",
@@ -26,7 +26,8 @@ app.add_middleware(
 )
 
 from .database import GameDatabase
-from .routes import ERROR_CODES, init_manager, router
+from .models import ERROR_INTERNAL, ERROR_SESSION_NOT_FOUND
+from .routes import init_manager, router
 
 app.include_router(router)
 
@@ -41,11 +42,11 @@ init_manager(db)
 
 @app.exception_handler(HTTPException)
 async def http_error_handler(request: Request, exc: HTTPException) -> JSONResponse:
-    error_code = ERROR_CODES.get("INTERNAL_ERROR", "ERR_INTERNAL")
+    error_code = ERROR_INTERNAL
     if exc.status_code == 404:
-        error_code = "ERR_NOT_FOUND"
+        error_code = ERROR_SESSION_NOT_FOUND
     elif exc.status_code == 422:
-        error_code = "ERR_VALIDATION_FAILED"
+        error_code = "VALIDATION_FAILED"
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -61,7 +62,7 @@ async def generic_error_handler(request: Request, exc: Exception) -> JSONRespons
     return JSONResponse(
         status_code=500,
         content={
-            "error_code": "ERR_INTERNAL",
+            "error_code": ERROR_INTERNAL,
             "detail": str(exc) if exc else "Internal server error",
             "path": str(request.url.path),
         },

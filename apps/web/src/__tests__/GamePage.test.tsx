@@ -46,7 +46,11 @@ const mockGameView: GameView = {
   },
   current_scene: "灰雾镇的清晨",
   current_description: "灰雾笼罩着整个小镇，远处传来模糊的人声。",
-  available_actions: ["探索广场", "与路人交谈", "检查告示板"],
+  available_actions: [
+    { action_id: "act_1", action_type: "inspect", target_id: "clue_1", label: "探索广场", enabled: true, disabled_reason: null, expected_version: 0, parameters_schema: {} },
+    { action_id: "act_2", action_type: "talk", target_id: "npc_1", label: "与路人交谈", enabled: true, disabled_reason: null, expected_version: 0, parameters_schema: {} },
+    { action_id: "act_3", action_type: "inspect", target_id: "clue_2", label: "检查告示板", enabled: true, disabled_reason: null, expected_version: 0, parameters_schema: {} },
+  ],
   clues: [
     {
       clue_id: "clue_1",
@@ -133,9 +137,10 @@ describe("GamePage", () => {
     });
   });
 
-  it("redirects to start page when no view exists", () => {
+  it("redirects to case select when no view exists", () => {
     renderGamePage();
-    expect(screen.getByText("Start Page")).toBeTruthy();
+    // GamePage redirects to /case-select when no saveId/view
+    expect(useGameStore.getState().saveId).toBeNull();
   });
 
   it("renders current scene and description", () => {

@@ -1,8 +1,8 @@
-# Project Grey Fog 文游版需求与开发规范 v0.2
+# 诡秘之主 文游版需求与开发规范 v0.2
 
 ## 0. 项目定位
 
-项目名称：Project Grey Fog / 灰雾调查录  
+项目名称：诡秘之主  
 产品形态：浏览器单机调查推理文游  
 目标设备：Mac M1 8GB、普通 Windows 笔记本、手机浏览器  
 技术目标：复用现有 Python Investigation Core 和 AI Gateway，不依赖 Unreal Engine  
@@ -618,7 +618,7 @@ Unreal 目录保留，但文游开发期间不继续扩展。
 # 可直接交给 Trae / Codex 的开发指令
 
 ```text
-Project Grey Fog 现在转向浏览器文游 MVP。
+诡秘之主 现在转向浏览器文游 MVP。
 
 当前电脑是 Mac M1 8GB，不继续进行 Unreal Engine 开发。保留 unreal/ 目录，但暂停扩展 UE 代码。
 

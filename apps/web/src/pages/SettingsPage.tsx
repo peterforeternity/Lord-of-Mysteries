@@ -76,7 +76,7 @@ export default function SettingsPage() {
             关于
           </h3>
           <div className="text-xs text-mystic-text-dim space-y-1">
-            <p>灰雾调查录 · Project Grey Fog</p>
+            <p>诡秘之主</p>
             <p>版本 0.1.0</p>
             <p className="italic mt-2">
               这是一个基于文本的调查解谜游戏。在灰雾笼罩的世界中，您将扮演调查员，揭开关联神秘事件的真相。

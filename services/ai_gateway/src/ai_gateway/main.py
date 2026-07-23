@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
 app = FastAPI(
-    title="Project Grey Fog - AI Gateway",
+    title="诡秘之主 - AI Gateway",
     version="0.1.0",
     description="Constrained AI dialogue gateway for investigation RPG",
 )

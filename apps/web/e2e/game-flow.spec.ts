@@ -116,7 +116,7 @@ test.describe("Text Game MVP E2E", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: "灰雾调查录" })
+      page.getByRole("heading", { name: "诡秘之主" })
     ).toBeVisible({ timeout: 10000 });
   });
 
@@ -135,7 +135,7 @@ test.describe("Text Game MVP E2E", () => {
     // Check that ending page redirects to start when no active game
     await page.goto("/ending");
     await expect(
-      page.getByRole("heading", { name: "灰雾调查录" })
+      page.getByRole("heading", { name: "诡秘之主" })
     ).toBeVisible({ timeout: 5000 });
   });
 

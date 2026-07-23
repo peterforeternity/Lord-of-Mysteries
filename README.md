@@ -1,4 +1,4 @@
-# Project Grey Fog / 灰雾调查录
+# 诡秘之主
 
 High-density investigation RPG — headless core, AI dialogue gateway, and browser-based text game MVP.
 

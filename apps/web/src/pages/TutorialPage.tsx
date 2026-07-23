@@ -6,7 +6,7 @@ const sections = [
     title: "游戏简介",
     content: (
       <p className="text-sm text-mystic-text leading-relaxed">
-        《灰雾调查录》是一款以维多利亚时代为背景的侦探推理文本游戏。
+        《诡秘之主》是一款以维多利亚时代为背景的侦探推理文本游戏。
         你扮演一名神秘的调查员，在一座被灰雾笼罩的城市中调查离奇案件。
         通过收集线索、审问嫌疑人、运用神秘能力，揭开隐藏在表象之下的真相。
       </p>
@@ -223,7 +223,7 @@ export default function TutorialPage() {
         {/* Footer */}
         <div className="divider" />
         <p className="text-mystic-text-dim/30 text-xs text-center italic pb-4">
-          灰雾调查录 · 真相终将浮现
+          诡秘之主 · 真相终将浮现
         </p>
       </div>
     </div>

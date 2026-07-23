@@ -8,12 +8,11 @@ export default function EndingPage() {
   const [searchParams] = useSearchParams();
   const { view, saveId, loading } = useGameStore();
 
-  // On mount, if save_id is in URL params and store is empty, use it
+  // A7: On mount, if save_id is in URL params and store is empty, fetch it
   useEffect(() => {
     const urlSaveId = searchParams.get("save_id");
     if (view) return;
     if (urlSaveId && !saveId) {
-      // First set saveId, then fetch the CURRENT in-memory view
       useGameStore.setState({ saveId: urlSaveId, loading: true });
       api.getView(urlSaveId).then((v) => {
         useGameStore.setState({ view: v, loading: false });
@@ -23,18 +22,30 @@ export default function EndingPage() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // A7: Navigation state machine — redirect if game is not over
   useEffect(() => {
+    if (view && !view.game_over) {
+      navigate("/game", { replace: true });
+      return;
+    }
     if (!view && !loading && !saveId && !searchParams.get("save_id")) {
-      navigate("/");
+      navigate("/", { replace: true });
     }
   }, [view, navigate, loading, saveId, searchParams]);
 
-  if (!view || !view.game_over) {
+  // A7: If not game_over, show loading or redirect message
+  if (!view) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-mystic-text-dim">案件尚未结束</p>
+        <p className="text-mystic-text-dim">
+          {loading ? "加载中..." : "案件尚未结束"}
+        </p>
       </div>
     );
+  }
+
+  if (!view.game_over) {
+    return null; // Will redirect via useEffect
   }
 
   const endingTypeLabels: Record<string, string> = {
@@ -131,7 +142,7 @@ export default function EndingPage() {
 
         {/* Footer */}
         <p className="text-mystic-text-dim/30 text-xs mt-6 italic">
-          灰雾调查录 · 真相终将浮现
+          诡秘之主 · 真相终将浮现
         </p>
       </div>
     </div>

@@ -1,4 +1,4 @@
-# 领域模型 — Project Grey Fog
+# 领域模型 — 诡秘之主
 
 本文档定义 investigation_core 中的核心领域对象及其关系。
 

@@ -11,7 +11,7 @@ export default function Layout() {
       <header className="bg-mystic-surface border-b border-mystic-card px-4 py-3 flex items-center justify-between shrink-0">
         <Link to="/" className="flex items-center gap-2 no-underline">
           <span className="text-mystic-gold text-xl font-serif font-bold tracking-wider">
-            灰雾调查录
+            诡秘之主
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-4">
