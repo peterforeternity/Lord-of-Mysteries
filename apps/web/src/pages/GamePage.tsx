@@ -219,6 +219,12 @@ export default function GamePage() {
             保存游戏
           </button>
           <button
+            onClick={() => navigate("/tutorial")}
+            className="btn-ghost w-full text-sm"
+          >
+            帮助
+          </button>
+          <button
             onClick={() => navigate("/save-load")}
             className="btn-ghost w-full text-sm"
           >

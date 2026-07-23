@@ -47,6 +47,13 @@ export default function StartPage() {
           >
             设置
           </button>
+
+          <button
+            onClick={() => navigate("/tutorial")}
+            className="btn-ghost w-full py-2 text-sm text-mystic-accent-dim"
+          >
+            新手教程
+          </button>
         </div>
 
         {/* Theme atmosphere */}
