@@ -1,20 +1,25 @@
 # Interaction Performance Report
 
 ## 数据来源
-- 采集方式：通过 httpx 客户端直接调用 Game API
-- 环境：LOCAL_BASELINE（本地开发环境）
+- 采集方式：通过 httpx 客户端直接调用 Game API（非浏览器端采集）
+- 环境：LOCAL_API_BASELINE（本地 API 基线，非生产环境）
 - 采集时间：2026-07-23
-- 注意：本地测试结果仅标注为 LOCAL_BASELINE，不得称为生产性能
+- GET health、GET view、POST action 延迟为真实 API 数据
+- 当前 "input_to_feedback" 来自 API 采集脚本，不是浏览器视觉反馈
+- 真实浏览器 UI 延迟 p50/p95/p99 尚未完成，标记：`PENDING_BROWSER_UI_MEASUREMENT`
+- 本报告不得声称已证明真实浏览器 UI p95 ≤ 100ms
 
-## UI 交互延迟
+## UI 交互延迟（API 级）
 
-### input_to_feedback（用户输入到反馈的总延迟）
+注意：以下数据为 API 往返时间，不代表浏览器端完整视觉反馈延迟。
+
+### input_to_feedback（API 请求到响应的时间）
 | 样本数 | 成功率 | p50 (ms) | p95 (ms) | p99 (ms) | 最大值 (ms) |
 |--------|--------|----------|----------|----------|-------------|
 | 211 | 210/211 (100%) | 2.02 | 4.44 | 10.86 | 14.27 |
 
 ### 验收目标
-- input_to_feedback p95 ≤ 100ms
+- API 级 input_to_feedback p95 ≤ 100ms（已满足）
 
 ## API 延迟
 
@@ -34,8 +39,8 @@
 | 54 | 53/54 (98%) | 2.11 | 4.92 | 13.74 | 14.27 |
 
 ### 验收目标
-- GET view p95 ≤ 300ms
-- POST action p95 ≤ 500ms
+- GET view p95 ≤ 300ms（已满足）
+- POST action p95 ≤ 500ms（已满足）
 
 ## 按 Action Type 统计
 
