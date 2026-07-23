@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# Project Grey Fog Text Game MVP — Dev Startup Script
+# 诡秘之主 Text Game MVP — Dev Startup Script
 # ============================================================
 # Starts both the Game API backend and React frontend.
 # Kill with Ctrl+C (kills both processes).
@@ -10,7 +10,7 @@ set -e
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-echo "=== Project Grey Fog — Text Game MVP ==="
+echo "=== 诡秘之主 — Text Game MVP ==="
 echo ""
 echo "Starting services..."
 echo ""

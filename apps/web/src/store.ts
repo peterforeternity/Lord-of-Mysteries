@@ -12,13 +12,17 @@ interface GameState {
   view: GameView | null;
   loading: boolean;
   error: string | null;
+  /** Tracks pending state per action_id to prevent duplicate submissions */
+  pendingActions: Record<string, boolean>;
 
   newGame: (caseId: string, seed?: number) => Promise<void>;
-  executeAction: (action: ActionRequestInput) => Promise<void>;
+  executeAction: (action: ActionRequestInput, actionId?: string) => Promise<void>;
   saveGame: () => Promise<void>;
   loadGame: (saveId: string) => Promise<void>;
   fetchView: () => Promise<void>;
   clearError: () => void;
+  setActionPending: (actionId: string) => void;
+  clearActionPending: (actionId: string) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -26,8 +30,23 @@ export const useGameStore = create<GameState>((set, get) => ({
   view: null,
   loading: false,
   error: null,
+  pendingActions: {},
 
   clearError: () => set({ error: null }),
+
+  setActionPending: (actionId: string) => {
+    set((s) => ({
+      pendingActions: { ...s.pendingActions, [actionId]: true },
+    }));
+  },
+
+  clearActionPending: (actionId: string) => {
+    set((s) => {
+      const next = { ...s.pendingActions };
+      delete next[actionId];
+      return { pendingActions: next };
+    });
+  },
 
   newGame: async (caseId: string, seed?: number) => {
     set({ loading: true, error: null });
@@ -42,29 +61,37 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  executeAction: async (action: ActionRequestInput) => {
+  executeAction: async (action: ActionRequestInput, actionId?: string) => {
     const { saveId, view } = get();
     if (!saveId) return;
+
+    // Mark this action as pending if actionId is provided
+    if (actionId) {
+      get().setActionPending(actionId);
+    }
+
     const actionWithVersion: ActionRequest = {
       ...action,
       expected_version: action.expected_version ?? (view?.state_version ?? 0),
     } as ActionRequest;
-    set({ loading: true, error: null });
+    set({ error: null });
     try {
-      const res = await api.executeAction(saveId, actionWithVersion);
+      const res = await api.executeAction(saveId, actionWithVersion, saveId);
       if (res.success && res.view) {
-        set({ view: res.view, loading: false });
+        set({ view: res.view });
       } else {
         set({
           error: res.error_detail || res.error_code || "操作失败",
-          loading: false,
         });
       }
     } catch (err) {
       set({
         error: err instanceof Error ? err.message : "执行操作失败",
-        loading: false,
       });
+    } finally {
+      if (actionId) {
+        get().clearActionPending(actionId);
+      }
     }
   },
 
@@ -73,7 +100,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!saveId) return;
     set({ loading: true, error: null });
     try {
-      await api.saveGame(saveId);
+      await api.saveGame(saveId, saveId);
       set({ loading: false });
     } catch (err) {
       set({
@@ -86,7 +113,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   loadGame: async (sid: string) => {
     set({ loading: true, error: null });
     try {
-      const view = await api.loadGame(sid);
+      const view = await api.loadGame(sid, sid);
       set({ saveId: sid, view, loading: false });
     } catch (err) {
       set({
@@ -101,7 +128,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!saveId) return;
     set({ loading: true, error: null });
     try {
-      const view = await api.getView(saveId);
+      const view = await api.getView(saveId, saveId);
       set({ view, loading: false });
     } catch (err) {
       set({

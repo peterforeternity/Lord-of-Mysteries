@@ -22,6 +22,13 @@ from investigation_core.models import CaseEvent, PlayerCaseState
 
 from .database import GameDatabase
 from .models import (
+    ERROR_GAME_ALREADY_FINISHED,
+    ERROR_INTERNAL,
+    ERROR_INVALID_TARGET,
+    ERROR_RESOURCE_INSUFFICIENT,
+    ERROR_STATE_VERSION_CONFLICT,
+    ERROR_TARGET_NOT_AVAILABLE,
+    ActionInfo,
     ActionType,
     ClaimInfo,
     ClueInfo,
@@ -98,6 +105,188 @@ class GameSession:
         self.state_version = 0
         self.game_over = False
         self.final_ending: str | None = None
+
+    def _get_available_actions(self) -> list[ActionInfo]:
+        """Generate structured available actions for the current state."""
+        ps = self.sm.player_state
+        current_loc = ps.current_location_id
+        version = self.state_version
+        actions: list[ActionInfo] = []
+
+        # --- Travel: one per reachable location ---
+        for lid, label in LOCATION_LABELS.items():
+            if lid == current_loc:
+                continue
+            actions.append(
+                ActionInfo(
+                    action_id=f"action_travel_{lid}_{version}",
+                    action_type="travel",
+                    target_id=lid,
+                    label=f"前往{label}",
+                    enabled=True,
+                    disabled_reason=None,
+                    expected_version=version,
+                    parameters_schema={"location_id": {"type": "string", "description": label}},
+                )
+            )
+
+        # --- Inspect: one per undiscovered clue at current location ---
+        available_clues = self.sm.get_available_clues()
+        for clue in available_clues:
+            if clue.location_id != current_loc:
+                continue
+            if clue.clue_id in ps.discovered_clue_ids:
+                continue
+            actions.append(
+                ActionInfo(
+                    action_id=f"action_inspect_{clue.clue_id}_{version}",
+                    action_type="inspect",
+                    target_id=clue.clue_id,
+                    label=f"调查{clue.display_name}",
+                    enabled=True,
+                    disabled_reason=None,
+                    expected_version=version,
+                    parameters_schema={
+                        "clue_id": {"type": "string", "description": clue.display_name}
+                    },
+                )
+            )
+
+        # --- Talk: one per available NPC at current location ---
+        current_npcs = self.sm.get_available_npcs()
+        for npc in current_npcs:
+            npc_label = NPC_NAMES.get(npc.npc_id, npc.name)
+            actions.append(
+                ActionInfo(
+                    action_id=f"action_talk_{npc.npc_id}_{version}",
+                    action_type="talk",
+                    target_id=npc.npc_id,
+                    label=f"与{npc_label}交谈",
+                    enabled=True,
+                    disabled_reason=None,
+                    expected_version=version,
+                    parameters_schema={"npc_id": {"type": "string", "description": npc_label}},
+                )
+            )
+
+        # --- Use Spirit Vision ---
+        if "use_spirit_vision" in LOCATION_ACTIONS.get(current_loc, []):
+            enabled = ps.spirituality >= 1
+            actions.append(
+                ActionInfo(
+                    action_id=f"action_use_spirit_vision_{version}",
+                    action_type="use_spirit_vision",
+                    target_id=None,
+                    label="使用灵视",
+                    enabled=enabled,
+                    disabled_reason="灵性不足" if not enabled else None,
+                    expected_version=version,
+                    parameters_schema={},
+                )
+            )
+
+        # --- Perform Divination ---
+        if "perform_divination" in LOCATION_ACTIONS.get(current_loc, []):
+            actions.append(
+                ActionInfo(
+                    action_id=f"action_perform_divination_{version}",
+                    action_type="perform_divination",
+                    target_id=None,
+                    label="进行占卜",
+                    enabled=True,
+                    disabled_reason=None,
+                    expected_version=version,
+                    parameters_schema={"question": {"type": "string", "description": "占卜问题"}},
+                )
+            )
+
+        # --- Perform Ritual: one per performable ritual ---
+        for ritual in self.sm.case.rituals:
+            can_perform = (
+                all(kid in ps.discovered_fact_ids for kid in ritual.required_knowledge_ids)
+                and ps.current_location_id == ritual.space_condition
+            )
+            actions.append(
+                ActionInfo(
+                    action_id=f"action_perform_ritual_{ritual.ritual_id}_{version}",
+                    action_type="perform_ritual",
+                    target_id=ritual.ritual_id,
+                    label=f"执行仪式：{ritual.name}",
+                    enabled=can_perform,
+                    disabled_reason="条件不满足" if not can_perform else None,
+                    expected_version=version,
+                    parameters_schema={
+                        "ritual_id": {"type": "string"},
+                        "materials": {"type": "array", "items": {"type": "string"}},
+                    },
+                )
+            )
+
+        # --- Use Item ---
+        if "use_item" in LOCATION_ACTIONS.get(current_loc, []) and self.sm.case.items:
+            for item in self.sm.case.items:
+                actions.append(
+                    ActionInfo(
+                        action_id=f"action_use_item_{item.item_id}_{version}",
+                        action_type="use_item",
+                        target_id=item.item_id,
+                        label=f"使用{item.name}",
+                        enabled=True,
+                        disabled_reason=None,
+                        expected_version=version,
+                        parameters_schema={"item_id": {"type": "string"}},
+                    )
+                )
+
+        # --- Submit Hypothesis: one per submittable hypothesis ---
+        for hypothesis in self.sm.case.hypotheses:
+            can_submit = (
+                all(cid in ps.discovered_clue_ids for cid in hypothesis.required_clue_ids)
+                and hypothesis.hypothesis_id not in ps.confirmed_hypothesis_ids
+                and hypothesis.hypothesis_id not in ps.rejected_hypothesis_ids
+            )
+            actions.append(
+                ActionInfo(
+                    action_id=f"action_submit_hypothesis_{hypothesis.hypothesis_id}_{version}",
+                    action_type="submit_hypothesis",
+                    target_id=hypothesis.hypothesis_id,
+                    label=f"提交假设：{hypothesis.title}",
+                    enabled=can_submit,
+                    disabled_reason="线索不足" if not can_submit else None,
+                    expected_version=version,
+                    parameters_schema={"hypothesis_id": {"type": "string"}},
+                )
+            )
+
+        # --- Rest ---
+        actions.append(
+            ActionInfo(
+                action_id=f"action_rest_{version}",
+                action_type="rest",
+                target_id=None,
+                label="休息恢复灵性",
+                enabled=True,
+                disabled_reason=None,
+                expected_version=version,
+                parameters_schema={},
+            )
+        )
+
+        # --- Save ---
+        actions.append(
+            ActionInfo(
+                action_id=f"action_save_{version}",
+                action_type="save",
+                target_id=None,
+                label="保存游戏",
+                enabled=True,
+                disabled_reason=None,
+                expected_version=version,
+                parameters_schema={},
+            )
+        )
+
+        return actions
 
     def _make_view(self) -> GameView:
         """Generate the current game view from state machine state."""
@@ -259,10 +448,8 @@ class GameSession:
             for e in self.sm.get_event_log()
         ]
 
-        # Available actions
-        available_actions = ["travel", "inspect", "talk", "rest", "submit_hypothesis", "save"]
-        if ps.current_location_id in LOCATION_ACTIONS:
-            available_actions.extend(LOCATION_ACTIONS[ps.current_location_id])
+        # Available actions — now structured
+        available_actions = self._get_available_actions()
 
         # Final ending
         final_ending: EndingInfo | None = None
@@ -296,7 +483,7 @@ class GameSession:
                 ps.current_location_id,
                 "你站在一个陌生地方。",
             ),
-            available_actions=list(set(available_actions)),
+            available_actions=available_actions,
             clues=clues,
             npcs=npcs,
             hypotheses=hypotheses,
@@ -309,6 +496,22 @@ class GameSession:
             ai_enabled=False,
         )
 
+    def _validate_action_target(self, action: GameAction) -> str | None:
+        """Returns an error code if the action's target is not in available_actions, else None."""
+        available = self._get_available_actions()
+        action_type = action.action_type.value
+        target_id = action.target_id or ""
+
+        for a in available:
+            if a.action_type != action_type:
+                continue
+            # Match by target_id — empty-string target matches actions without a target
+            if (a.target_id is None and not target_id) or (a.target_id == target_id):
+                if a.enabled:
+                    return None
+                return ERROR_TARGET_NOT_AVAILABLE
+        return ERROR_INVALID_TARGET
+
     def execute_action(
         self, action: GameAction
     ) -> tuple[bool, str | None, list[dict[str, Any]], str | None]:
@@ -317,10 +520,15 @@ class GameSession:
         Returns (success, error_code, events, ending_id).
         """
         if self.game_over:
-            return False, "GAME_ALREADY_OVER", [], None
+            return False, ERROR_GAME_ALREADY_FINISHED, [], None
 
         if action.expected_version != self.state_version:
-            return False, "STATE_VERSION_CONFLICT", [], None
+            return False, ERROR_STATE_VERSION_CONFLICT, [], None
+
+        # Validate target against available_actions
+        target_error = self._validate_action_target(action)
+        if target_error is not None:
+            return False, target_error, [], None
 
         events: list[dict[str, Any]] = []
 
@@ -328,7 +536,7 @@ class GameSession:
             if action.action_type == ActionType.TRAVEL:
                 location_id = action.target_id or action.parameters.get("location_id", "")
                 if not location_id:
-                    return False, "INVALID_TARGET", [], None
+                    return False, ERROR_INVALID_TARGET, [], None
                 self.sm.move_to_location(location_id)
                 self.state_version += 1
                 events.append(
@@ -341,7 +549,7 @@ class GameSession:
             elif action.action_type == ActionType.INSPECT:
                 clue_id = action.target_id or action.parameters.get("clue_id", "")
                 if not clue_id:
-                    return False, "INVALID_TARGET", [], None
+                    return False, ERROR_INVALID_TARGET, [], None
                 success, event = self.sm.discover_clue(clue_id)
                 if success and event:
                     self.state_version += 1
@@ -353,7 +561,7 @@ class GameSession:
                         }
                     )
                 elif not success:
-                    return False, "CLUE_NOT_AVAILABLE", [], None
+                    return False, ERROR_TARGET_NOT_AVAILABLE, [], None
 
             elif action.action_type == ActionType.TALK:
                 npc_id = action.target_id or action.parameters.get("npc_id", "")
@@ -375,7 +583,7 @@ class GameSession:
             elif action.action_type == ActionType.USE_SPIRIT_VISION:
                 action.target_id or action.parameters.get("target_id", "")
                 if self.sm.player_state.spirituality < 1:
-                    return False, "INSUFFICIENT_SPIRITUALITY", [], None
+                    return False, ERROR_RESOURCE_INSUFFICIENT, [], None
                 self.sm.player_state.spirituality = max(0, self.sm.player_state.spirituality - 1)
                 event_id = "evt_spirit_vision"
                 if event_id not in self.sm.player_state.completed_events:
@@ -420,7 +628,7 @@ class GameSession:
                 ritual_id = action.target_id or action.parameters.get("ritual_id", "")
                 materials = action.parameters.get("materials", [])
                 if not ritual_id:
-                    return False, "INVALID_TARGET", [], None
+                    return False, ERROR_INVALID_TARGET, [], None
                 success, message, corruption = self.sm.perform_ritual(
                     ritual_id, materials, self.seed + self.state_version
                 )
@@ -437,10 +645,10 @@ class GameSession:
             elif action.action_type == ActionType.USE_ITEM:
                 item_id = action.target_id or action.parameters.get("item_id", "")
                 if not item_id:
-                    return False, "INVALID_TARGET", [], None
+                    return False, ERROR_INVALID_TARGET, [], None
                 item = next((i for i in self.sm.case.items if i.item_id == item_id), None)
                 if item is None:
-                    return False, "ITEM_NOT_FOUND", [], None
+                    return False, ERROR_TARGET_NOT_AVAILABLE, [], None
                 # Use item ability - simplified for MVP
                 self.state_version += 1
                 events.append(
@@ -453,7 +661,7 @@ class GameSession:
             elif action.action_type == ActionType.SUBMIT_HYPOTHESIS:
                 hypothesis_id = action.target_id or action.parameters.get("hypothesis_id", "")
                 if not hypothesis_id:
-                    return False, "INVALID_TARGET", [], None
+                    return False, ERROR_INVALID_TARGET, [], None
                 success, event, ending_id = self.sm.submit_hypothesis(hypothesis_id)
                 if success:
                     self.state_version += 1
@@ -480,7 +688,7 @@ class GameSession:
                             )
                     return True, None, events, ending_id
                 else:
-                    return False, "HYPOTHESIS_FAILED", [], None
+                    return False, ERROR_TARGET_NOT_AVAILABLE, [], None
 
             elif action.action_type == ActionType.REST:
                 self.sm.player_state.spirituality = min(5, self.sm.player_state.spirituality + 2)
@@ -509,7 +717,7 @@ class GameSession:
                 return False, "UNKNOWN_ACTION", [], None
 
         except Exception as e:
-            return False, "INTERNAL_ERROR", [], str(e)
+            return False, ERROR_INTERNAL, [], str(e)
 
         return True, None, events, None
 

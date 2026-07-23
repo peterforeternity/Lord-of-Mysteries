@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGameStore } from "../store";
 import PlayerStatus from "../components/PlayerStatus";
@@ -7,32 +7,73 @@ import ClueList from "../components/ClueList";
 import EventLog from "../components/EventLog";
 import HypothesisPanel from "../components/HypothesisPanel";
 import NpcDialogue from "../components/NpcDialogue";
-import type { ClueInfo, NpcInfo } from "../types";
+import type { ClueInfo, NpcInfo, ActionInfo } from "../types";
 
 export default function GamePage() {
   const navigate = useNavigate();
-  const { view, loading, error, executeAction, fetchView, saveGame } =
-    useGameStore();
+  const {
+    view,
+    loading,
+    error,
+    executeAction,
+    fetchView,
+    saveGame,
+    pendingActions,
+    saveId,
+  } = useGameStore();
   const [dialogueNpc, setDialogueNpc] = useState<NpcInfo | null>(null);
   const [selectedClue, setSelectedClue] = useState<ClueInfo | null>(null);
 
+  // A7: Navigation state machine — redirect based on game state
   useEffect(() => {
-    if (!view) {
-      navigate("/");
+    if (!saveId) {
+      navigate("/case-select", { replace: true });
+      return;
     }
-  }, [view, navigate]);
+    if (!view && !loading) {
+      navigate("/case-select", { replace: true });
+      return;
+    }
+    if (view?.game_over) {
+      navigate(`/ending?save_id=${encodeURIComponent(saveId)}`, {
+        replace: true,
+      });
+      return;
+    }
+  }, [view, saveId, loading, navigate]);
+
+  // A7: Fetch view on mount if saveId exists but view is null
+  useEffect(() => {
+    if (saveId && !view && !loading) {
+      fetchView();
+    }
+  }, [saveId, view, loading, fetchView]);
+
+  // A4: Handle action using ActionInfo from backend
+  const handleAction = useCallback(
+    (action: ActionInfo) => {
+      if (pendingActions[action.action_id]) return;
+      executeAction(
+        {
+          action_type: action.action_type,
+          target_id: action.target_id ?? undefined,
+          expected_version: action.expected_version,
+        },
+        action.action_id
+      );
+    },
+    [executeAction, pendingActions]
+  );
 
   if (!view) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-mystic-text-dim">返回主页开始新游戏</p>
+        <p className="text-mystic-text-dim">
+          {loading ? "加载中..." : "返回主页开始新游戏"}
+        </p>
       </div>
     );
   }
-
-  const handleAction = (actionType: string) => {
-    executeAction({ action_type: actionType });
-  };
 
   const handleSave = async () => {
     await saveGame();
@@ -97,22 +138,35 @@ export default function GamePage() {
           </p>
         </div>
 
-        {/* Actions */}
+        {/* A4+A6: Actions rendered from backend available_actions */}
         <div className="card mb-4">
           <h3 className="text-mystic-gold text-sm font-bold mb-3 tracking-wider">
             行动
           </h3>
           <div className="grid gap-2 sm:grid-cols-2">
-            {view.available_actions.map((action) => (
-              <button
-                key={action}
-                onClick={() => handleAction(action)}
-                disabled={loading}
-                className="btn-secondary text-left text-sm"
-              >
-                <span className="font-medium">{action}</span>
-              </button>
-            ))}
+            {view.available_actions.map((action) => {
+              const isPending = pendingActions[action.action_id];
+              return (
+                <button
+                  key={action.action_id}
+                  onClick={() => handleAction(action)}
+                  disabled={!action.enabled || isPending}
+                  title={
+                    !action.enabled && action.disabled_reason
+                      ? action.disabled_reason
+                      : undefined
+                  }
+                  className="btn-secondary text-left text-sm relative"
+                >
+                  <span className="font-medium">{action.label}</span>
+                  {isPending && (
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-mystic-text-dim">
+                      ...
+                    </span>
+                  )}
+                </button>
+              );
+            })}
             {view.available_actions.length === 0 && (
               <p className="text-mystic-text-dim text-xs italic col-span-full">
                 当前没有可用行动
@@ -158,7 +212,7 @@ export default function GamePage() {
           </div>
         )}
 
-        {/* Loading */}
+        {/* Global Loading */}
         {loading && (
           <div className="text-center py-2">
             <span className="text-mystic-text-dim text-sm">处理中...</span>
@@ -197,7 +251,7 @@ export default function GamePage() {
         {/* Hypothesis Panel */}
         <HypothesisPanel hypotheses={view.hypotheses} />
 
-        {/* Actions */}
+        {/* Sidebar Navigation */}
         <div className="space-y-2">
           <button
             onClick={() => navigate("/deduction")}

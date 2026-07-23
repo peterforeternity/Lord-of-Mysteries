@@ -12,7 +12,7 @@ export default function StartPage() {
       <div className="text-center max-w-md">
         {/* Title */}
         <h1 className="text-4xl md:text-5xl font-serif font-bold text-mystic-gold mb-4 tracking-widest">
-          灰雾调查录
+          诡秘之主
         </h1>
         <p className="text-mystic-text-dim text-sm mb-10">
           在灰雾笼罩的世界中，揭开隐藏的真相

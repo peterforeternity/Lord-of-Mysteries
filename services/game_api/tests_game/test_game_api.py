@@ -96,7 +96,7 @@ def test_state_version_conflict(client: TestClient):
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is False
-    assert data["error_code"] == "ERR_STATE_VERSION_CONFLICT"
+    assert data["error_code"] == "STATE_VERSION_CONFLICT"
 
 
 def test_inspect_action(client: TestClient, case_dir: Path):
@@ -177,17 +177,29 @@ def test_divination_action(client: TestClient):
     resp = client.post("/v1/game/new?case_id=case_clockmaker_01")
     save_id = resp.json()["save_id"]
 
-    # Perform divination
+    # Travel to workshop first (divination is only available there)
     action = {
-        "action_type": "perform_divination",
-        "parameters": {"question": "寻找方向"},
+        "action_type": "travel",
+        "target_id": "workshop",
         "expected_version": 0,
     }
     resp = client.post(f"/v1/game/{save_id}/action", json=action)
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
-    assert data["state_version"] == 1
+    version = data["state_version"]
+
+    # Perform divination
+    action = {
+        "action_type": "perform_divination",
+        "parameters": {"question": "寻找方向"},
+        "expected_version": version,
+    }
+    resp = client.post(f"/v1/game/{save_id}/action", json=action)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert data["state_version"] == version + 1
 
 
 def test_rest_action(client: TestClient):
@@ -284,7 +296,7 @@ def test_game_over_after_hypothesis(client: TestClient):
     data = resp.json()
     # May fail due to missing clues, not a game error
     if not data["success"]:
-        assert data["error_code"] in ["ERR_INVALID_TARGET", "HYPOTHESIS_FAILED"]
+        assert data["error_code"] in ["TARGET_NOT_AVAILABLE", "HYPOTHESIS_FAILED"]
 
 
 def test_view_not_game_over_after_new_game(client: TestClient):

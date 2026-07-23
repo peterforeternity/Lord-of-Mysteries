@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI Demo for Project Grey Fog - The Clockmaker's Disappearance."""
+"""CLI Demo for 诡秘之主 - The Clockmaker's Disappearance."""
 
 import json
 import tempfile

@@ -18,10 +18,20 @@ export default function DeductionBoardPage() {
 
   const handleSubmitHypothesis = async (hypothesisId: string) => {
     setSubmitting(hypothesisId);
-    await executeAction({
-      action_type: "submit_hypothesis",
-      target_id: hypothesisId,
-    });
+    // Look up action from backend available_actions
+    const actionInfo = view.available_actions.find(
+      (a) => a.action_type === "submit_hypothesis" && a.target_id === hypothesisId
+    );
+    if (actionInfo) {
+      await executeAction(
+        {
+          action_type: actionInfo.action_type,
+          target_id: actionInfo.target_id ?? undefined,
+          expected_version: actionInfo.expected_version,
+        },
+        actionInfo.action_id
+      );
+    }
     setSubmitting(null);
   };
 

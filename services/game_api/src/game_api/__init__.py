@@ -1,4 +1,4 @@
-"""Game API for Project Grey Fog text-based MVP.
+"""Game API for 诡秘之主 text-based MVP.
 
 Provides a RESTful HTTP interface for the investigation core,
 manages game sessions with SQLite persistence.

@@ -18,10 +18,20 @@ export default function RitualPage() {
   const rituals = view.rituals || [];
 
   const handlePerformRitual = async (ritualId: string) => {
-    await executeAction({
-      action_type: "perform_ritual",
-      target_id: ritualId,
-    });
+    // Look up action from backend available_actions
+    const actionInfo = view.available_actions.find(
+      (a) => a.action_type === "perform_ritual" && a.target_id === ritualId
+    );
+    if (actionInfo) {
+      await executeAction(
+        {
+          action_type: actionInfo.action_type,
+          target_id: actionInfo.target_id ?? undefined,
+          expected_version: actionInfo.expected_version,
+        },
+        actionInfo.action_id
+      );
+    }
     setSelectedRitual(null);
   };
 

@@ -1,7 +1,7 @@
 [project]
 name = "project-grey-fog"
 version = "0.1.0"
-description = "Project Grey Fog - Headless Core for investigation RPG"
+description = "诡秘之主 - Headless Core for investigation RPG"
 requires-python = ">=3.12"
 dependencies = [
     "ai-gateway",
