@@ -1,20 +1,25 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useGameStore } from "../store";
+import * as api from "../api";
 
 export default function EndingPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { view, saveId, loading, fetchView, loadGame } = useGameStore();
+  const { view, saveId, loading } = useGameStore();
 
-  // On mount, if save_id is in URL params and store is empty, load it
+  // On mount, if save_id is in URL params and store is empty, use it
   useEffect(() => {
     const urlSaveId = searchParams.get("save_id");
     if (view) return;
-    if (urlSaveId && !saveId && !loading) {
-      loadGame(urlSaveId);
-    } else if (saveId && !loading && !view) {
-      fetchView();
+    if (urlSaveId && !saveId) {
+      // First set saveId, then fetch the CURRENT in-memory view
+      useGameStore.setState({ saveId: urlSaveId, loading: true });
+      api.getView(urlSaveId).then((v) => {
+        useGameStore.setState({ view: v, loading: false });
+      }).catch(() => {
+        useGameStore.setState({ loading: false });
+      });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
