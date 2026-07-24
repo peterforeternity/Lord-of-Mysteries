@@ -611,4 +611,79 @@ describe("GameStore", () => {
     // After resolution, pending should be cleared
     expect(useGameStore.getState().pendingActions).toEqual({});
   });
+
+  // Test 28: newGame persists saveId and caseId to localStorage
+  it("should persist saveId to localStorage on newGame", async () => {
+    localStorage.clear();
+    const mockResponse: NewGameResponse = {
+      save_id: "local_save_001",
+      case_id: "case_clockmaker_01",
+      view: mockGameView,
+    };
+    vi.mocked(api.newGame).mockResolvedValue(mockResponse);
+
+    await act(async () => {
+      await useGameStore.getState().newGame("case_clockmaker_01");
+    });
+
+    const savedSaveId = localStorage.getItem("active_save_id");
+    const savedCaseId = localStorage.getItem("active_case_id");
+    expect(savedSaveId).toBe("local_save_001");
+    expect(savedCaseId).toBe("case_clockmaker_01");
+    expect(useGameStore.getState().saveId).toBe("local_save_001");
+  });
+
+  // Test 29: initFromStorage restores save from localStorage
+  it("should restore save from localStorage on initFromStorage", async () => {
+    localStorage.clear();
+    localStorage.setItem("active_save_id", "restored_save_001");
+    localStorage.setItem("active_case_id", "case_clockmaker_01");
+
+    vi.mocked(api.getView).mockResolvedValue(mockGameView);
+
+    const restoredView = { ...mockGameView };
+    vi.mocked(api.getView).mockResolvedValue(restoredView);
+
+    await act(async () => {
+      await useGameStore.getState().initFromStorage();
+    });
+
+    const state = useGameStore.getState();
+    expect(state.saveId).toBe("restored_save_001");
+    expect(state.view).toBe(restoredView);
+  });
+
+  // Test 30: initFromStorage fails gracefully when save is invalid
+  it("should clean up on invalid save during initFromStorage", async () => {
+    localStorage.clear();
+    localStorage.setItem("active_save_id", "invalid_save");
+    localStorage.setItem("active_case_id", "case_clockmaker_01");
+
+    vi.mocked(api.getView).mockRejectedValue(new Error("Save not found"));
+
+    await act(async () => {
+      await useGameStore.getState().initFromStorage();
+    });
+
+    const state = useGameStore.getState();
+    expect(state.saveId).toBeNull();
+    expect(state.view).toBeNull();
+    // localStorage should be cleaned
+    expect(localStorage.getItem("active_save_id")).toBeNull();
+  });
+
+  // Test 31: clearActiveSave clears localStorage and state
+  it("should clear localStorage and state on clearActiveSave", () => {
+    localStorage.setItem("active_save_id", "save_001");
+    localStorage.setItem("active_case_id", "case_1");
+    useGameStore.setState({ saveId: "save_001", view: mockGameView });
+
+    useGameStore.getState().clearActiveSave();
+
+    const state = useGameStore.getState();
+    expect(state.saveId).toBeNull();
+    expect(state.view).toBeNull();
+    expect(localStorage.getItem("active_save_id")).toBeNull();
+    expect(localStorage.getItem("active_case_id")).toBeNull();
+  });
 });

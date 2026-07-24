@@ -32,26 +32,27 @@ async def api_proxy(request: Request) -> Response:
     path = request.url.path
     query = request.url.query
 
-    # Extract and forward headers
+    # Extract and forward headers, removing hop-by-hop headers
     headers = dict(request.headers)
-    # Remove hop-by-hop headers
     for h in ("host", "connection", "transfer-encoding"):
         headers.pop(h, None)
 
+    body: bytes | None = None
+    if request.method == "POST":
+        body = await request.body()
+        # Forward Content-Type and Content-Length if present in original request
+        if "content-type" in request.headers:
+            headers["content-type"] = request.headers["content-type"]
+        if "content-length" in request.headers:
+            headers["content-length"] = request.headers["content-length"]
+
     client = httpx.AsyncClient(base_url=API_BASE, timeout=30.0)
     try:
+        full_path = path + (f"?{query}" if query else "")
         if request.method == "GET":
-            resp = await client.get(
-                path + (f"?{query}" if query else ""),
-                headers=headers,
-            )
+            resp = await client.get(full_path, headers=headers)
         elif request.method == "POST":
-            body = await request.body()
-            resp = await client.post(
-                path + (f"?{query}" if query else ""),
-                content=body,
-                headers=dict(request.headers),
-            )
+            resp = await client.post(full_path, content=body, headers=headers)
         else:
             return JSONResponse({"error": "Method not allowed"}, status_code=405)
 
@@ -69,8 +70,11 @@ async def api_proxy(request: Request) -> Response:
             status_code=503,
         )
     except Exception as e:
+        import traceback
+
+        traceback.print_exc()
         return JSONResponse(
-            {"error": "PROXY_ERROR", "detail": str(e)},
+            {"error": "PROXY_ERROR", "detail": f"{type(e).__name__}: {e}"},
             status_code=502,
         )
     finally:
@@ -113,9 +117,8 @@ async def health(_request: Request) -> JSONResponse:
 # Routes
 routes = [
     Route("/health", endpoint=health, methods=["GET"]),
-    Route("/v1/health", endpoint=api_proxy, methods=["GET"]),
-    # API routes
-    Route("/v1/game/{path:path}", endpoint=api_proxy, methods=["GET", "POST"]),
+    # All /v1/* paths → API proxy
+    Route("/v1/{path:path}", endpoint=api_proxy, methods=["GET", "POST"]),
     # Static assets
     Mount(
         "/assets",

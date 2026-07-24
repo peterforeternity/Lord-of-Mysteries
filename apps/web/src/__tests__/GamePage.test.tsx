@@ -218,4 +218,72 @@ describe("GamePage", () => {
     renderGamePage();
     expect(screen.getByText("处理中...")).toBeTruthy();
   });
+
+  it("shows 调查进度 button", () => {
+    useGameStore.setState({ saveId: "save_1", view: mockGameView });
+    renderGamePage();
+    const buttons = screen.getAllByText("调查进度");
+    expect(buttons.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("opens and closes progress modal", async () => {
+    useGameStore.setState({
+      saveId: "save_1",
+      view: {
+        ...mockGameView,
+        investigation_progress: {
+          phase_level: 1,
+          phase_label: "线索浮现",
+          evidence_dimensions: [],
+          recent_discoveries: [],
+          open_questions: [],
+          resolution_available: false,
+          new_resolution_available: false,
+        },
+      },
+    });
+    renderGamePage();
+    // Click "调查进度" button
+    const progressBtn = screen.getAllByText("调查进度")[0];
+    progressBtn.click();
+    // Wait for modal to appear
+    await waitFor(() => {
+      expect(screen.getByText("案件推进程度概览")).toBeTruthy();
+    });
+    // Click "继续调查" to close
+    screen.getByText("继续调查").click();
+    await waitFor(() => {
+      expect(screen.queryByText("案件推进程度概览")).toBeNull();
+    });
+  });
+
+  it("restores focus to 调查进度 button after modal closes", async () => {
+    useGameStore.setState({
+      saveId: "save_1",
+      view: {
+        ...mockGameView,
+        investigation_progress: {
+          phase_level: 1,
+          phase_label: "线索浮现",
+          evidence_dimensions: [],
+          recent_discoveries: [],
+          open_questions: [],
+          resolution_available: false,
+          new_resolution_available: false,
+        },
+      },
+    });
+    renderGamePage();
+    const progressBtns = screen.getAllByText("调查进度");
+    progressBtns[0].click();
+    // Wait for modal to appear
+    await waitFor(() => {
+      expect(screen.getByText("继续调查")).toBeTruthy();
+    });
+    // Close modal
+    screen.getByText("继续调查").click();
+    await waitFor(() => {
+      expect(document.activeElement?.textContent).toContain("调查进度");
+    });
+  });
 });
