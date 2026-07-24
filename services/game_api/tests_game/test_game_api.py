@@ -359,7 +359,9 @@ def test_hypothesis_view_shows_progress(client: TestClient):
         assert "hypothesis_id" in h
         assert "title" in h
         assert "can_submit" in h
-        assert "found_clue_count" in h
+        assert "clue_status" in h
+        assert "found_clue_count" not in h
+        assert "required_clue_count" not in h
 
 
 def test_all_endings_reachable(client: TestClient, playthrough_dir: Path):

@@ -73,8 +73,7 @@ const mockGameView: GameView = {
       description: "测试假设的描述",
       status: "unlocked",
       min_confidence: 0.6,
-      required_clue_count: 3,
-      found_clue_count: 1,
+      clue_status: "证据不足",
       can_submit: false,
     },
   ],
@@ -91,6 +90,7 @@ const mockGameView: GameView = {
   ],
   game_over: false,
   final_ending: null,
+  investigation_progress: null,
   ai_enabled: true,
 };
 
@@ -359,9 +359,9 @@ describe("EndingPage", () => {
         { clue_id: "c2", display_name: "C2", description: "", source_type: "", is_new: false },
       ],
       hypotheses: [
-        { hypothesis_id: "h1", title: "H1", description: "", status: "confirmed", min_confidence: 0, required_clue_count: 0, found_clue_count: 0, can_submit: false },
-        { hypothesis_id: "h2", title: "H2", description: "", status: "refuted", min_confidence: 0, required_clue_count: 0, found_clue_count: 0, can_submit: false },
-        { hypothesis_id: "h3", title: "H3", description: "", status: "unlocked", min_confidence: 0, required_clue_count: 0, found_clue_count: 0, can_submit: false },
+        { hypothesis_id: "h1", title: "H1", description: "", status: "confirmed", min_confidence: 0, clue_status: "证据较充分", can_submit: false },
+        { hypothesis_id: "h2", title: "H2", description: "", status: "refuted", min_confidence: 0, clue_status: "存在矛盾", can_submit: false },
+        { hypothesis_id: "h3", title: "H3", description: "", status: "unlocked", min_confidence: 0, clue_status: "证据不足", can_submit: false },
       ],
       final_ending: {
         ending_id: "end_1",

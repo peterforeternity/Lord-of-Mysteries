@@ -86,8 +86,7 @@ const mockGameView: GameView = {
       description: "最近的失踪事件可能与灰雾有关",
       status: "unlocked",
       min_confidence: 0.6,
-      required_clue_count: 3,
-      found_clue_count: 1,
+      clue_status: "证据不足",
       can_submit: false,
     },
   ],
@@ -112,6 +111,7 @@ const mockGameView: GameView = {
   ],
   game_over: false,
   final_ending: null,
+  investigation_progress: null,
   ai_enabled: true,
 };
 

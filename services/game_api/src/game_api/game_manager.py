@@ -34,15 +34,36 @@ from .models import (
     ClueInfo,
     EndingInfo,
     EventLogEntry,
+    EvidenceDimension,
     GameAction,
     GameView,
     HypothesisInfo,
+    InvestigationProgress,
     ItemInfo,
     LocationInfo,
     NpcInfo,
     PlayerStatus,
     RitualInfo,
 )
+
+# Evidence dimension definitions — keyed by clue source_type
+EVIDENCE_DIMENSIONS: dict[str, tuple[str, str]] = {
+    "environment": ("scene", "现场痕迹"),
+    "npc_statement": ("witness", "人物证言"),
+    "experiment": ("anomaly", "异常现象"),
+    "document": ("items", "物品与材料"),
+    "deduction": ("causality", "事件因果"),
+}
+
+# Open questions that appear when related clues are found
+OPEN_QUESTIONS: list[tuple[list[str], str]] = [
+    (["clue_material_receipt"], "材料收据是否与失踪有关？"),
+    (["clue_neighbor_testimony", "clue_landlord_contradiction"], "不同人物为何对时间描述不一致？"),
+    (["clue_burn_pattern"], "工坊异常发生在失踪之前还是之后？"),
+    (["clue_shopkeeper_testimony"], "失踪者购买的危险物品去了哪里？"),
+    (["clue_spirit_vision_entity"], "灵体与失踪者是什么关系？"),
+    (["clue_hidden_compartment"], "暗格中的生活痕迹是否属于失踪者？"),
+]
 
 CASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "content" / "cases"
 
@@ -105,6 +126,7 @@ class GameSession:
         self.state_version = 0
         self.game_over = False
         self.final_ending: str | None = None
+        self._resolution_notified: bool = False  # True after resolution hint has been shown
 
     def _get_available_actions(self) -> list[ActionInfo]:
         """Generate structured available actions for the current state."""
@@ -286,7 +308,127 @@ class GameSession:
             )
         )
 
+        # --- Dismiss Resolution Hint (hidden from UI, only for API) ---
+        if self._compute_investigation_progress().new_resolution_available:
+            actions.append(
+                ActionInfo(
+                    action_id=f"action_dismiss_resolution_{version}",
+                    action_type="dismiss_resolution_hint",
+                    target_id=None,
+                    label="",
+                    enabled=True,
+                    disabled_reason=None,
+                    expected_version=version,
+                    parameters_schema={},
+                )
+            )
+
         return actions
+
+    def _compute_investigation_progress(self) -> InvestigationProgress:
+        """Compute safe investigation progress from current state.
+
+        Must NOT leak ending_id, candidate_id, required_clues,
+        missing_clues, correct_hypothesis, or unlock_conditions.
+        """
+        ps = self.sm.player_state
+        all_clues = self.sm.case.clues
+        discovered_ids = set(ps.discovered_clue_ids)
+
+        # --- Phase level based on discovered clue ratio ---
+        total_clues = len(all_clues)
+        found_count = len(discovered_ids) if total_clues > 0 else 0
+        ratio = found_count / total_clues if total_clues > 0 else 0.0
+
+        if ratio < 0.25:
+            phase_level = 0
+            phase_label = "迷雾初现"
+        elif ratio < 0.50:
+            phase_level = 1
+            phase_label = "线索浮现"
+        elif ratio < 0.75:
+            phase_level = 2
+            phase_label = "疑点交汇"
+        else:
+            phase_level = 3
+            phase_label = "接近真相"
+
+        # --- Evidence dimensions ---
+        dim_buckets: dict[str, list[str]] = {
+            "environment": [],
+            "npc_statement": [],
+            "experiment": [],
+            "document": [],
+            "deduction": [],
+        }
+        for clue in all_clues:
+            src = (
+                clue.source_type.value
+                if hasattr(clue.source_type, "value")
+                else str(clue.source_type)
+            )
+            if src in dim_buckets:
+                dim_buckets[src].append(clue.clue_id)
+
+        dimensions: list[EvidenceDimension] = []
+        for src, (dim_id, label) in EVIDENCE_DIMENSIONS.items():
+            total_in_dim = len(dim_buckets.get(src, []))
+            found_in_dim = sum(1 for cid in dim_buckets.get(src, []) if cid in discovered_ids)
+
+            if total_in_dim == 0:
+                status_label = "尚无发现"
+            else:
+                dim_ratio = found_in_dim / total_in_dim
+                if dim_ratio < 0.2:
+                    status_label = "尚无发现"
+                elif dim_ratio < 0.4:
+                    status_label = "出现疑点"
+                elif dim_ratio < 0.6:
+                    status_label = "线索增加"
+                elif dim_ratio < 0.8:
+                    status_label = "相互印证"
+                else:
+                    status_label = "基本明确"
+
+            dimensions.append(
+                EvidenceDimension(
+                    dimension_id=dim_id,
+                    label=label,
+                    status_label=status_label,
+                )
+            )
+
+        # --- Recent discoveries (up to 3 display names) ---
+        discovered_clues = [c for c in all_clues if c.clue_id in discovered_ids]
+        recent_3 = discovered_clues[-3:] if len(discovered_clues) >= 3 else discovered_clues
+        recent_discoveries = [c.display_name for c in recent_3]
+
+        # --- Open questions (only when related clues are found) ---
+        open_questions: list[str] = []
+        for required_clues, question in OPEN_QUESTIONS:
+            if all(cid in discovered_ids for cid in required_clues):
+                open_questions.append(question)
+
+        # --- Resolution available: any hypothesis fully clued? ---
+        resolution_available = any(
+            all(cid in ps.discovered_clue_ids for cid in h.required_clue_ids)
+            and h.hypothesis_id not in ps.confirmed_hypothesis_ids
+            and h.hypothesis_id not in ps.rejected_hypothesis_ids
+            for h in self.sm.case.hypotheses
+        )
+
+        # --- New hint flag: only true once per resolution state ---
+        new_resolution_available = resolution_available and not self._resolution_notified
+
+        return InvestigationProgress(
+            phase_level=phase_level,
+            phase_label=phase_label,
+            evidence_dimensions=dimensions,
+            recent_discoveries=recent_discoveries,
+            open_questions=open_questions,
+            resolution_available=resolution_available,
+            new_resolution_available=new_resolution_available,
+        )
 
     def _make_view(self) -> GameView:
         """Generate the current game view from state machine state."""
@@ -376,19 +518,31 @@ class GameSession:
                 )
             )
 
-        # Hypotheses
+        # Hypotheses — only fuzzy clue_status, never exact counts
         hypotheses: list[HypothesisInfo] = []
         for h in self.sm.case.hypotheses:
+            total_clues = len(h.required_clue_ids)
             found_clues = sum(1 for cid in h.required_clue_ids if cid in ps.discovered_clue_ids)
+            status_val = h.status.value
+
+            # Compute fuzzy clue_status from internal counts
+            if status_val == "refuted":
+                clue_status = "存在矛盾"
+            elif found_clues >= total_clues:
+                clue_status = "证据较充分"
+            elif total_clues > 0 and found_clues >= total_clues * 0.5:
+                clue_status = "可以验证"
+            else:
+                clue_status = "证据不足"
+
             hypotheses.append(
                 HypothesisInfo(
                     hypothesis_id=h.hypothesis_id,
                     title=h.title,
                     description=h.description,
-                    status=h.status.value,
+                    status=status_val,
                     min_confidence=h.min_confidence,
-                    required_clue_count=len(h.required_clue_ids),
-                    found_clue_count=found_clues,
+                    clue_status=clue_status,
                     can_submit=all(cid in ps.discovered_clue_ids for cid in h.required_clue_ids)
                     and h.hypothesis_id not in ps.confirmed_hypothesis_ids
                     and h.hypothesis_id not in ps.rejected_hypothesis_ids,
@@ -491,6 +645,7 @@ class GameSession:
             items=items,
             rituals=rituals,
             event_log=event_log,
+            investigation_progress=self._compute_investigation_progress(),
             game_over=self.game_over,
             final_ending=final_ending,
             ai_enabled=False,
@@ -713,6 +868,15 @@ class GameSession:
                 # Load is handled at the route level
                 pass
 
+            elif action.action_type == ActionType.DISMISS_RESOLUTION:
+                self._resolution_notified = True
+                events.append(
+                    {
+                        "event_type": "dismiss_resolution",
+                        "description": "已关闭结局解锁提示。",
+                    }
+                )
+
             else:
                 return False, "UNKNOWN_ACTION", [], None
 
@@ -730,6 +894,7 @@ class GameSession:
             "state_version": self.state_version,
             "game_over": self.game_over,
             "final_ending": self.final_ending,
+            "resolution_notified": self._resolution_notified,
             "player_state": self._serialize_player_state(),
             "event_log": self._serialize_event_log(),
         }
@@ -758,6 +923,7 @@ class GameSession:
         session.state_version = data.get("state_version", 0)
         session.game_over = bool(data.get("game_over", False))
         session.final_ending = data.get("final_ending")
+        session._resolution_notified = bool(data.get("resolution_notified", False))
 
         # Restore player state
         player_raw = data.get("player_state", "{}")
@@ -870,6 +1036,7 @@ class GameManager:
             seed=save_dict["seed"],
             state_version=save_dict["state_version"],
             game_over=save_dict["game_over"],
+            resolution_notified=save_dict.get("resolution_notified", False),
             player_state_json=save_dict["player_state"],
             event_log_json=save_dict["event_log"],
             view_cache=view_cache,
@@ -913,6 +1080,7 @@ class GameManager:
         )
         session.state_version = row.get("state_version", 0)
         session.game_over = bool(row.get("game_over", False))
+        session._resolution_notified = bool(row.get("resolution_notified", False))
 
         self._sessions[save_id] = session
         return session

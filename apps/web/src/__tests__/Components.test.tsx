@@ -110,8 +110,7 @@ const mockHypotheses: HypothesisInfo[] = [
     description: "最近的失踪事件可能与灰雾的出现有关联",
     status: "unlocked",
     min_confidence: 0.6,
-    required_clue_count: 3,
-    found_clue_count: 1,
+    clue_status: "证据不足",
     can_submit: false,
   },
   {
@@ -120,8 +119,7 @@ const mockHypotheses: HypothesisInfo[] = [
     description: "多名失踪者可能被同一人所害",
     status: "confirmed",
     min_confidence: 0.8,
-    required_clue_count: 5,
-    found_clue_count: 5,
+    clue_status: "证据较充分",
     can_submit: false,
   },
   {
@@ -130,8 +128,7 @@ const mockHypotheses: HypothesisInfo[] = [
     description: "这次事件可能涉及超自然力量",
     status: "locked",
     min_confidence: 0.5,
-    required_clue_count: 2,
-    found_clue_count: 0,
+    clue_status: "证据不足",
     can_submit: false,
   },
   {
@@ -140,8 +137,7 @@ const mockHypotheses: HypothesisInfo[] = [
     description: "这条假设已被推翻",
     status: "refuted",
     min_confidence: 0.7,
-    required_clue_count: 3,
-    found_clue_count: 2,
+    clue_status: "存在矛盾",
     can_submit: false,
   },
 ];
@@ -301,12 +297,22 @@ describe("NpcDialogue", () => {
 
 describe("HypothesisPanel", () => {
   it("renders empty state when no hypotheses", () => {
-    render(<HypothesisPanel hypotheses={[]} />);
+    render(<HypothesisPanel hypotheses={[]} resolutionAvailable={true} />);
     expect(screen.getByText("暂无假设")).toBeTruthy();
   });
 
+  it("shows placeholder when resolution not available", () => {
+    render(<HypothesisPanel hypotheses={[]} resolutionAvailable={false} />);
+    expect(screen.getByText("目前的证据还不足以形成稳定判断。")).toBeTruthy();
+  });
+
   it("renders hypothesis titles and statuses", () => {
-    render(<HypothesisPanel hypotheses={mockHypotheses} />);
+    render(
+      <HypothesisPanel
+        hypotheses={mockHypotheses}
+        resolutionAvailable={true}
+      />
+    );
     expect(screen.getByText("失踪案与灰雾有关")).toBeTruthy();
     expect(screen.getByText("待验证")).toBeTruthy();
     expect(screen.getByText("已确认")).toBeTruthy();
@@ -314,14 +320,30 @@ describe("HypothesisPanel", () => {
   });
 
   it("shows locked hypothesis as ???", () => {
-    render(<HypothesisPanel hypotheses={mockHypotheses} />);
+    render(
+      <HypothesisPanel
+        hypotheses={mockHypotheses}
+        resolutionAvailable={true}
+      />
+    );
     expect(screen.getByText("???")).toBeTruthy();
     expect(screen.getByText("未解锁")).toBeTruthy();
   });
 
-  it("shows clue progress for unlocked hypotheses", () => {
-    render(<HypothesisPanel hypotheses={mockHypotheses} />);
-    expect(screen.getByText("线索 1/3")).toBeTruthy();
+  it("shows fuzzy clue_status instead of exact counts", () => {
+    render(
+      <HypothesisPanel
+        hypotheses={mockHypotheses}
+        resolutionAvailable={true}
+      />
+    );
+    // Should NOT show exact X/Y pattern
+    const bodyText = document.body.textContent || "";
+    expect(bodyText.match(/\b\d+\/\d+\b/)).toBeNull();
+    // Should show fuzzy status labels
+    expect(screen.getByText("证据不足")).toBeTruthy();
+    expect(screen.getByText("证据较充分")).toBeTruthy();
+    expect(screen.getByText("存在矛盾")).toBeTruthy();
   });
 
   it("shows can_submit indicator", () => {
@@ -329,11 +351,29 @@ describe("HypothesisPanel", () => {
       {
         ...mockHypotheses[0],
         can_submit: true,
-        found_clue_count: 3,
+        clue_status: "证据不足",
       },
     ];
-    render(<HypothesisPanel hypotheses={submitableHyp} />);
+    render(
+      <HypothesisPanel
+        hypotheses={submitableHyp}
+        resolutionAvailable={true}
+      />
+    );
     expect(screen.getByText("可提交")).toBeTruthy();
+  });
+
+  it("does NOT show hypothesis details without resolution", () => {
+    render(
+      <HypothesisPanel
+        hypotheses={mockHypotheses}
+        resolutionAvailable={false}
+      />
+    );
+    expect(screen.queryByText("失踪案与灰雾有关")).toBeNull();
+    expect(screen.queryByText("证据不足")).toBeNull();
+    expect(screen.queryByText("可以验证")).toBeNull();
+    expect(screen.getByText("目前的证据还不足以形成稳定判断。")).toBeTruthy();
   });
 });
 

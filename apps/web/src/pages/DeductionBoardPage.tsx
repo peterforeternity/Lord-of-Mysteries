@@ -138,10 +138,13 @@ export default function DeductionBoardPage() {
 
       {/* Hypotheses Section */}
       <div className="mt-6">
-        <HypothesisPanel hypotheses={view.hypotheses} />
+        <HypothesisPanel
+          hypotheses={view.hypotheses}
+          resolutionAvailable={view.investigation_progress?.resolution_available}
+        />
 
         {/* Hypothesis Submission */}
-        {view.hypotheses.some((h) => h.can_submit) && (
+        {view.investigation_progress?.resolution_available && view.hypotheses.some((h) => h.can_submit) && (
           <div className="card mt-4">
             <h3 className="text-mystic-gold text-sm font-bold mb-3 tracking-wider">
               提交假设
@@ -159,7 +162,7 @@ export default function DeductionBoardPage() {
                         {h.title}
                       </p>
                       <p className="text-xs text-mystic-text-dim">
-                        线索 {h.found_clue_count}/{h.required_clue_count}
+                        {h.clue_status || "证据不足"}
                       </p>
                     </div>
                     <button

@@ -37,6 +37,7 @@ class GameDatabase:
                         seed INTEGER NOT NULL DEFAULT 0,
                         state_version INTEGER NOT NULL DEFAULT 0,
                         game_over INTEGER NOT NULL DEFAULT 0,
+                        resolution_notified INTEGER NOT NULL DEFAULT 0,
                         player_state TEXT NOT NULL,
                         event_log TEXT NOT NULL DEFAULT '[]',
                         view_cache TEXT,
@@ -56,6 +57,34 @@ class GameDatabase:
                 conn.commit()
             finally:
                 conn.close()
+        self._run_migrations()
+
+    def _run_migrations(self) -> None:
+        """Run idempotent schema migrations.
+
+        Uses PRAGMA table_info to check for missing columns before
+        attempting ALTER TABLE.  Designed to be safe to run on every
+        startup — no-op if all columns already exist.
+        """
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                # Check existing columns in the saves table
+                existing = {
+                    row[1]  # column name is at index 1 in PRAGMA table_info output
+                    for row in conn.execute("PRAGMA table_info(saves)")
+                }
+
+                # Migration 1: add resolution_notified (added in v2 schema)
+                if "resolution_notified" not in existing:
+                    conn.execute(
+                        "ALTER TABLE saves "
+                        "ADD COLUMN resolution_notified INTEGER NOT NULL DEFAULT 0"
+                    )
+
+                conn.commit()
+            finally:
+                conn.close()
 
     def save_game(
         self,
@@ -67,6 +96,7 @@ class GameDatabase:
         player_state_json: str,
         event_log_json: str,
         view_cache: str | None = None,
+        resolution_notified: bool = False,
     ) -> None:
         with self._lock:
             conn = self._get_conn()
@@ -74,14 +104,15 @@ class GameDatabase:
                 conn.execute(
                     """INSERT OR REPLACE INTO saves
                        (save_id, case_id, seed, state_version, game_over,
-                        player_state, event_log, view_cache, updated_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))""",
+                        resolution_notified, player_state, event_log, view_cache, updated_at)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))""",
                     (
                         save_id,
                         case_id,
                         seed,
                         state_version,
                         1 if game_over else 0,
+                        1 if resolution_notified else 0,
                         player_state_json,
                         event_log_json,
                         view_cache,

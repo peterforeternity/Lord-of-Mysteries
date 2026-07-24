@@ -37,6 +37,7 @@ class ActionType(str, Enum):
     REST = "rest"
     SAVE = "save"
     LOAD = "load"
+    DISMISS_RESOLUTION = "dismiss_resolution_hint"
 
 
 class ActionInfo(BaseModel):
@@ -137,15 +138,18 @@ class LocationInfo(BaseModel):
 
 
 class HypothesisInfo(BaseModel):
-    """Public hypothesis info for the view."""
+    """Public hypothesis info for the view.
+
+    Must NOT expose exact clue counts (required_clue_count / found_clue_count).
+    Use clue_status for a fuzzy assessment instead.
+    """
 
     hypothesis_id: str
     title: str
     description: str
     status: str
     min_confidence: int
-    required_clue_count: int
-    found_clue_count: int
+    clue_status: str = "证据不足"  # 证据不足 / 可以验证 / 存在矛盾 / 证据较充分
     can_submit: bool
 
 
@@ -200,6 +204,33 @@ class EventLogEntry(BaseModel):
     timestamp: str
 
 
+class EvidenceDimension(BaseModel):
+    """Status of a single evidence dimension.
+
+    Must NOT expose exact counts (found/total) to prevent clue counting.
+    """
+
+    dimension_id: str
+    label: str
+    status_label: str  # 尚无发现 / 出现疑点 / 线索增加 / 相互印证 / 基本明确
+
+
+class InvestigationProgress(BaseModel):
+    """Safe investigation progress summary for the client.
+
+    Must NOT leak: ending_id, candidate_id, required_clues,
+    missing_clues, correct_hypothesis, or unlock_conditions.
+    """
+
+    phase_level: int  # 0-3
+    phase_label: str  # 迷雾初现 / 线索浮现 / 疑点交汇 / 接近真相
+    evidence_dimensions: list[EvidenceDimension] = Field(default_factory=list)
+    recent_discoveries: list[str] = Field(default_factory=list)  # up to 3 recent clue display names
+    open_questions: list[str] = Field(default_factory=list)
+    resolution_available: bool = False
+    new_resolution_available: bool = False
+
+
 class GameView(BaseModel):
     """The complete game state view returned to the client.
 
@@ -226,6 +257,7 @@ class GameView(BaseModel):
     items: list[ItemInfo] = Field(default_factory=list)
     rituals: list[RitualInfo] = Field(default_factory=list)
     event_log: list[EventLogEntry] = Field(default_factory=list)
+    investigation_progress: InvestigationProgress | None = None
     game_over: bool = False
     final_ending: EndingInfo | None = None
     ai_enabled: bool = False

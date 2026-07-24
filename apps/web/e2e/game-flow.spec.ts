@@ -1,8 +1,63 @@
 import { test, expect, Page } from "@playwright/test";
+import http from "http";
 
 // ================================================================
 // Helpers
 // ================================================================
+
+const API_BASE = process.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+
+/** Make a GET request to the API from the Node.js process */
+function nodeFetchGet(path: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const url = new URL(path, API_BASE);
+    http
+      .get(url.href, (res) => {
+        let data = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(e);
+          }
+        });
+      })
+      .on("error", reject);
+  });
+}
+
+/** Get game view via Node.js HTTP (not page.evaluate) */
+async function apiGetView(saveId: string): Promise<any> {
+  return nodeFetchGet(`/v1/game/${saveId}/view`);
+}
+
+/** Save game via browser fetch using relative URL (through Vite proxy) */
+async function apiSaveGame(page: Page, saveId: string): Promise<any> {
+  return page.evaluate(
+    async ({ sid }) => {
+      const res = await fetch(`/v1/game/${sid}/save`, {
+        method: "POST",
+      });
+      return res.json();
+    },
+    { sid: saveId }
+  );
+}
+
+/** Load game via browser fetch using relative URL (through Vite proxy) */
+async function apiLoadGame(page: Page, saveId: string): Promise<any> {
+  return page.evaluate(
+    async ({ sid }) => {
+      const res = await fetch(`/v1/game/${sid}/load`, {
+        method: "POST",
+      });
+      return res.json();
+    },
+    { sid: saveId }
+  );
+}
 
 /** Navigate from start → case-select → game via UI clicks */
 async function startNewGame(page: Page) {
@@ -83,6 +138,60 @@ async function createGameViaApi(page: Page, seed: number = 42) {
     { baseUrl, seed }
   );
   return resp as { save_id: string; view: any };
+}
+
+/** Initialize the zustand store with a game session for UI navigation */
+async function initGameInStore(page: Page, saveId: string, view: any) {
+  // Navigate to app root to load React
+  await page.goto("/");
+  await page.waitForTimeout(500);
+  // Set the store state
+  await page.evaluate(
+    ({ sid, v }) => {
+      const store = (window as any).__ZUSTAND_STORE__;
+      if (store) {
+        store.setState({ saveId: sid, view: v, loading: false });
+      }
+    },
+    { sid: saveId, v: view }
+  );
+}
+
+/** Navigate within the SPA by clicking a React Router link */
+async function spaNavigate(page: Page, href: string) {
+  await page.locator(`a[href="${href}"]`).first().click();
+  await page.waitForTimeout(500);
+}
+
+/**
+ * Navigate from home page (/) to a SPA route.
+ * The nav links are hidden on /, so we first navigate to case-select via button click
+ * (which is SPA navigation and preserves store), then click the nav link.
+ */
+async function spaNavigateFromHome(page: Page, targetUrl: string) {
+  // First navigate to case-select via button click (SPA nav, preserves store)
+  await page.locator("text=案件选择").first().click();
+  await page.waitForTimeout(500);
+  // Then click the nav link for the target URL
+  if (targetUrl !== "/case-select") {
+    await page.locator(`a[href="${targetUrl}"]`).first().click();
+    await page.waitForTimeout(500);
+  }
+}
+
+/** Load a page, then init store — avoids full nav reset */
+async function initPageAndStore(page: Page, url: string, saveId: string, view: any) {
+  await page.goto(url);
+  await page.waitForTimeout(500);
+  await page.evaluate(
+    ({ sid, v }) => {
+      const store = (window as any).__ZUSTAND_STORE__;
+      if (store) {
+        store.setState({ saveId: sid, view: v, loading: false });
+      }
+    },
+    { sid: saveId, v: view }
+  );
 }
 
 /** Navigate to the deduction page, find a hypothesis, and submit it */
@@ -310,8 +419,6 @@ test.describe("Text Game MVP E2E", () => {
 
     const game = await createGameViaApi(page, 999);
     const sid = game.save_id;
-    const initialView = game.view;
-
     // Step 1: Game starts at apartment — inspect clues directly
     let r = await apiAction(page, sid, "inspect", "clue_material_receipt");
     expect(r.success).toBe(true);
@@ -369,21 +476,8 @@ test.describe("Text Game MVP E2E", () => {
     await page.reload();
     await page.waitForTimeout(1000);
 
-    // Step 7: Navigate to save-load page and load the save
-    await page.goto("/save-load");
-    await page.waitForTimeout(2000);
-
-    // Load via API (the save-load UI may not have the exact interaction we need)
-    const loadRes = await page.evaluate(
-      async ({ baseUrl, sid }) => {
-        const res = await fetch(`${baseUrl}/v1/game/${sid}/load`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-        return res.json();
-      },
-      { baseUrl: "http://127.0.0.1:8000", sid }
-    );
+    // Step 7: Load the save via browser fetch
+    const loadRes = await apiLoadGame(page, sid);
 
     // Step 8: Assert all fields are restored
     expect(loadRes.state_version).toBe(beforeSave.state_version);
@@ -501,5 +595,336 @@ test.describe("Text Game MVP E2E", () => {
     // Check that essential game elements are available
     const hasActions = await page.locator("text=行动").count();
     expect(hasActions).toBeGreaterThanOrEqual(1);
+  });
+
+  // ---------------------------------------------------------------
+  // 9. investigation_progress — verify modal, fuzzy labels, no leakage
+  // ---------------------------------------------------------------
+  test("investigation_progress_basic", async ({ page }) => {
+    await startNewGame(page);
+
+    // Open the investigation progress modal
+    await page.locator("text=调查进度").first().click();
+    await page.waitForTimeout(500);
+
+    // Should show the modal
+    await expect(page.locator("text=调查阶段").first()).toBeVisible({
+      timeout: 3000,
+    });
+
+    // Should show fuzzy status labels (not exact counts)
+    await expect(page.locator("text=尚无发现").first()).toBeVisible();
+    await expect(page.locator("text=证据维度").first()).toBeVisible();
+
+    // Should NOT show found/total counts
+    const bodyText = await page.textContent("body");
+    expect(bodyText!.match(/\d+\/\d+/g)).toBeNull();
+
+    // Close via button
+    await page.locator("text=继续调查").first().click();
+    await page.waitForTimeout(300);
+
+    // Modal should be gone
+    await expect(page.locator("text=调查阶段")).toHaveCount(0);
+  });
+
+  // ---------------------------------------------------------------
+  // 10. investigation_progress_phase_changes
+  // ---------------------------------------------------------------
+  test("investigation_progress_phase_changes", async ({ page }) => {
+    const game = await createGameViaApi(page, 42);
+    const sid = game.save_id;
+
+    // Open progress modal via direct navigation
+    // First verify initial phase is 迷雾初现
+    let view = game.view;
+    expect(view.investigation_progress.phase_level).toBe(0);
+    expect(view.investigation_progress.phase_label).toBe("迷雾初现");
+
+    // Discover a few clues (travel + inspect)
+    let r = await apiAction(page, sid, "inspect", "clue_material_receipt");
+    expect(r.success).toBe(true);
+
+    r = await apiAction(page, sid, "travel", "workshop");
+    expect(r.success).toBe(true);
+
+    // Discover multiple workshop clues to advance phase
+    for (const cid of ["clue_lab_notes", "clue_burn_pattern", "clue_residual_energy"]) {
+      r = await apiAction(page, sid, "inspect", cid);
+      expect(r.success).toBe(true);
+    }
+
+    // Now check phase has advanced
+    const updatedView = await page.evaluate(async (sid) => {
+      const res = await fetch(
+        `http://127.0.0.1:8000/v1/game/${sid}/view`
+      );
+      const data = await res.json();
+      return data.investigation_progress;
+    }, sid);
+
+    expect(updatedView.phase_level).toBeGreaterThanOrEqual(1);
+    expect(["线索浮现", "疑点交汇"]).toContain(updatedView.phase_label);
+  });
+
+  // ---------------------------------------------------------------
+  // 11. investigation_progress_no_hypothesis_leakage
+  // ---------------------------------------------------------------
+  test("investigation_progress_no_hypothesis_leakage", async ({ page }) => {
+    const game = await createGameViaApi(page, 42);
+    const sid = game.save_id;
+    const view = game.view;
+
+    // Before any clues: resolution_available should be false
+    expect(view.investigation_progress.resolution_available).toBe(false);
+
+    // Load deduction page, then init store so view is available
+    await initPageAndStore(page, "/deduction", sid, view);
+
+    // Should show placeholder message
+    await expect(
+      page.locator("text=目前的证据还不足以形成稳定判断。").first()
+    ).toBeVisible({ timeout: 5000 });
+  });
+
+  // ---------------------------------------------------------------
+  // 12. investigation_progress — resolution hint and continue flow
+  // ---------------------------------------------------------------
+  test("investigation_progress_resolution_hint", async ({ page }) => {
+    const game = await createGameViaApi(page, 42);
+    const sid = game.save_id;
+
+    // Gather clues for a hypothesis (clinic)
+    let r = await apiAction(page, sid, "travel", "clinic");
+    expect(r.success).toBe(true);
+
+    r = await apiAction(page, sid, "inspect", "clue_medical_record");
+    expect(r.success).toBe(true);
+
+    r = await apiAction(page, sid, "inspect", "clue_doctor_testimony");
+    expect(r.success).toBe(true);
+
+    // Check investigation progress via API
+    const view = await page.evaluate(async (sid) => {
+      const res = await fetch(
+        `http://127.0.0.1:8000/v1/game/${sid}/view`
+      );
+      const data = await res.json();
+      return data.investigation_progress;
+    }, sid);
+
+    // resolution_available should now be true
+    expect(view.resolution_available).toBe(true);
+    expect(view.new_resolution_available).toBe(true);
+
+    // Get latest view for store init
+    const latestView = await page.evaluate(async (sid) => {
+      const res = await fetch(
+        `http://127.0.0.1:8000/v1/game/${sid}/view`
+      );
+      return await res.json();
+    }, sid);
+    await initGameInStore(page, sid, latestView);
+    await spaNavigateFromHome(page, "/game");
+
+    // Check the resolution hint dialog appears
+    await expect(
+      page.locator("text=新的判断正在形成").first()
+    ).toBeVisible({ timeout: 5000 });
+
+    // Click "继续调查" — should dismiss without ending
+    await page.locator("button:has-text('继续调查')").first().click();
+
+    // Wait for hint to be dismissed (visible → not visible)
+    await expect(
+      page.locator("text=新的判断正在形成")
+    ).not.toBeVisible({ timeout: 5000 });
+
+    // Verify game is still active
+    await expect(page.locator("text=状态").first()).toBeVisible({
+      timeout: 3000,
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // 13. investigation_progress — refresh preserves seen state
+  // ---------------------------------------------------------------
+  test("investigation_progress_refresh_preserves_hint", async ({ page }) => {
+    const game = await createGameViaApi(page, 42);
+    const sid = game.save_id;
+
+    // Gather clues for resolution
+    let r = await apiAction(page, sid, "travel", "clinic");
+    expect(r.success).toBe(true);
+    r = await apiAction(page, sid, "inspect", "clue_medical_record");
+    expect(r.success).toBe(true);
+    r = await apiAction(page, sid, "inspect", "clue_doctor_testimony");
+    expect(r.success).toBe(true);
+
+    // Dismiss resolution hint via API
+    const dismissResult = await page.evaluate(async (sid) => {
+      // Get current state version
+      const viewRes = await fetch(
+        `http://127.0.0.1:8000/v1/game/${sid}/view`
+      );
+      const view = await viewRes.json();
+
+      // Dismiss
+      const res = await fetch(
+        `http://127.0.0.1:8000/v1/game/${sid}/action`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action_type: "dismiss_resolution_hint",
+            expected_version: view.state_version,
+            idempotency_key: "e2e-test-dismiss",
+          }),
+        }
+      );
+      return res.json();
+    }, sid);
+    expect(dismissResult.success).toBe(true);
+
+    // Refresh
+    await page.reload();
+    await page.waitForTimeout(2000);
+
+    // Navigate to game
+    await page.goto("/game");
+    await page.waitForTimeout(2000);
+
+    // Hint should NOT reappear
+    await expect(
+      page.locator("text=新的判断正在形成")
+    ).toHaveCount(0);
+  });
+
+  // ---------------------------------------------------------------
+  // 14. investigation_progress — no exact clue numbers in modal
+  // ---------------------------------------------------------------
+  test("investigation_progress_no_exact_numbers", async ({ page }) => {
+    await startNewGame(page);
+
+    // Open modal
+    await page.locator("text=调查进度").first().click();
+    await page.waitForTimeout(500);
+
+    const bodyText = await page.textContent("body");
+
+    // No "X/Y" pattern (clue counts)
+    expect(bodyText!.match(/\b\d+\/\d+\b/)).toBeNull();
+
+    // No "found" or "total" text
+    expect(bodyText!.toLowerCase()).not.toContain("found");
+    expect(bodyText!.toLowerCase()).not.toContain("total");
+
+    // Close modal
+    await page.locator("text=继续调查").first().click();
+  });
+
+  // ---------------------------------------------------------------
+  // 15. investigation_progress — "进入推理" navigates to deduction board
+  // ---------------------------------------------------------------
+  test("investigation_progress_enter_deduction", async ({ page }) => {
+    const game = await createGameViaApi(page, 42);
+    const sid = game.save_id;
+
+    // Gather clues for resolution
+    let r = await apiAction(page, sid, "travel", "clinic");
+    expect(r.success).toBe(true);
+    r = await apiAction(page, sid, "inspect", "clue_medical_record");
+    expect(r.success).toBe(true);
+    r = await apiAction(page, sid, "inspect", "clue_doctor_testimony");
+    expect(r.success).toBe(true);
+
+    // Init store at home, then SPA-navigate to game page
+    await initGameInStore(page, sid, r.view);
+    await spaNavigateFromHome(page, "/game");
+
+    // Dismiss resolution hint dialog if it appears (overlay blocks other buttons)
+    const hintBtn = page.locator("button:has-text('继续调查')");
+    if (await hintBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await hintBtn.click();
+      await page.waitForTimeout(500);
+    }
+
+    // Open investigation progress modal
+    await page.locator("button:has-text('调查进度')").first().click();
+    await page.waitForTimeout(500);
+
+    // "进入推理" button should be visible
+    await expect(page.locator("text=进入推理").first()).toBeVisible({
+      timeout: 3000,
+    });
+
+    // Click "进入推理"
+    await page.locator("text=进入推理").first().click();
+    await page.waitForTimeout(1000);
+
+    // Should navigate to deduction board
+    await expect(page.locator("text=推理板").first()).toBeVisible({
+      timeout: 5000,
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // 16. investigation_progress — save/load preserves progress state
+  // ---------------------------------------------------------------
+  test("investigation_progress_save_load_preserves_state", async ({
+    page,
+  }) => {
+    const game = await createGameViaApi(page, 42);
+    const sid = game.save_id;
+
+    // Gather clues to advance phase
+    let r = await apiAction(page, sid, "inspect", "clue_material_receipt");
+    expect(r.success).toBe(true);
+
+    r = await apiAction(page, sid, "travel", "workshop");
+    expect(r.success).toBe(true);
+
+    for (const cid of [
+      "clue_lab_notes",
+      "clue_burn_pattern",
+      "clue_residual_energy",
+    ]) {
+      r = await apiAction(page, sid, "inspect", cid);
+      expect(r.success).toBe(true);
+    }
+
+    // Refresh page context before API calls to avoid stale fetch
+    // Use a direct goto so the page is at a known, stable URL
+    await page.goto("/");
+    await page.waitForTimeout(500);
+
+    // Get progress after clues using node.js http request (not page.evaluate)
+    const afterCluesView = await apiGetView(sid);
+    const midView = afterCluesView.investigation_progress;
+    expect(midView.phase_level).toBeGreaterThanOrEqual(1);
+
+    // Save the game
+    const saveRes = await apiSaveGame(page, sid);
+    expect(saveRes.success).toBe(true);
+
+    // Load the game and get fresh view
+    const loadRes = await apiLoadGame(page, sid);
+
+    // Verify investigation progress is preserved after load
+    expect(loadRes.investigation_progress.phase_level).toBe(
+      midView.phase_level
+    );
+    expect(loadRes.investigation_progress.phase_label).toBe(
+      midView.phase_label
+    );
+    expect(loadRes.investigation_progress.evidence_dimensions.length).toBe(
+      midView.evidence_dimensions.length
+    );
+
+    // Verify exact counts are still not leaked after load
+    for (const dim of loadRes.investigation_progress.evidence_dimensions) {
+      expect(dim).not.toHaveProperty("found");
+      expect(dim).not.toHaveProperty("total");
+    }
   });
 });
