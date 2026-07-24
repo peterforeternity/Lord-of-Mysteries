@@ -518,19 +518,31 @@ class GameSession:
                 )
             )
 
-        # Hypotheses
+        # Hypotheses — only fuzzy clue_status, never exact counts
         hypotheses: list[HypothesisInfo] = []
         for h in self.sm.case.hypotheses:
+            total_clues = len(h.required_clue_ids)
             found_clues = sum(1 for cid in h.required_clue_ids if cid in ps.discovered_clue_ids)
+            status_val = h.status.value
+
+            # Compute fuzzy clue_status from internal counts
+            if status_val == "refuted":
+                clue_status = "存在矛盾"
+            elif found_clues >= total_clues:
+                clue_status = "证据较充分"
+            elif total_clues > 0 and found_clues >= total_clues * 0.5:
+                clue_status = "可以验证"
+            else:
+                clue_status = "证据不足"
+
             hypotheses.append(
                 HypothesisInfo(
                     hypothesis_id=h.hypothesis_id,
                     title=h.title,
                     description=h.description,
-                    status=h.status.value,
+                    status=status_val,
                     min_confidence=h.min_confidence,
-                    required_clue_count=len(h.required_clue_ids),
-                    found_clue_count=found_clues,
+                    clue_status=clue_status,
                     can_submit=all(cid in ps.discovered_clue_ids for cid in h.required_clue_ids)
                     and h.hypothesis_id not in ps.confirmed_hypothesis_ids
                     and h.hypothesis_id not in ps.rejected_hypothesis_ids,

@@ -71,8 +71,7 @@ const mockGameView: GameView = {
       description: "最近的失踪事件可能与灰雾的出现有关联",
       status: "unlocked",
       min_confidence: 0.6,
-      required_clue_count: 3,
-      found_clue_count: 1,
+      clue_status: "可以验证",
       can_submit: false,
     },
   ],
@@ -365,8 +364,7 @@ describe("GameStore", () => {
     expect(hyp.title).toBe("失踪案与灰雾有关");
     expect(hyp.status).toBe("unlocked");
     expect(hyp.can_submit).toBe(false);
-    expect(hyp.found_clue_count).toBe(1);
-    expect(hyp.required_clue_count).toBe(3);
+    expect(hyp.clue_status).toBe("可以验证");
   });
 
   // Test 18: Ritual info fields

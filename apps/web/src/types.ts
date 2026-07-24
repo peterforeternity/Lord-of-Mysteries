@@ -46,15 +46,14 @@ export interface ClaimInfo {
   speaker_believes_it: boolean;
 }
 
-/** Hypothesis info */
+/** Hypothesis info — must NOT expose exact clue counts */
 export interface HypothesisInfo {
   hypothesis_id: string;
   title: string;
   description: string;
   status: string;
   min_confidence: number;
-  required_clue_count: number;
-  found_clue_count: number;
+  clue_status: string;
   can_submit: boolean;
 }
 

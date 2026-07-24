@@ -138,15 +138,18 @@ class LocationInfo(BaseModel):
 
 
 class HypothesisInfo(BaseModel):
-    """Public hypothesis info for the view."""
+    """Public hypothesis info for the view.
+
+    Must NOT expose exact clue counts (required_clue_count / found_clue_count).
+    Use clue_status for a fuzzy assessment instead.
+    """
 
     hypothesis_id: str
     title: str
     description: str
     status: str
     min_confidence: int
-    required_clue_count: int
-    found_clue_count: int
+    clue_status: str = "证据不足"  # 证据不足 / 可以验证 / 存在矛盾 / 证据较充分
     can_submit: bool
 
 

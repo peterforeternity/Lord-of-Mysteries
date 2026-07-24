@@ -162,7 +162,7 @@ export default function DeductionBoardPage() {
                         {h.title}
                       </p>
                       <p className="text-xs text-mystic-text-dim">
-                        线索 {h.found_clue_count}/{h.required_clue_count}
+                        {h.clue_status || "证据不足"}
                       </p>
                     </div>
                     <button
