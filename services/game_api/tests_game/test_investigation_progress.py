@@ -122,25 +122,38 @@ class TestEvidenceDimensions:
         for dim_id in ("scene", "witness", "anomaly", "items", "causality"):
             assert dim_id in dims, f"Missing dimension: {dim_id}"
 
-    def test_initial_all_zero(self, client: TestClient) -> None:
+    def test_dimensions_do_not_have_counts(self, client: TestClient) -> None:
+        """Verify dimensions do NOT expose found/total counts."""
         _, view = _create_game(client)
         for dim in view["investigation_progress"]["evidence_dimensions"]:
-            assert dim["found"] == 0
+            assert "found" not in dim
+            assert "total" not in dim
 
-    def test_scene_clues_tracked(self, client: TestClient) -> None:
+    def test_dimension_status_label_changes_with_clues(self, client: TestClient) -> None:
+        """Verify status_label changes as clues are discovered (without leaking counts)."""
         save_id, view = _create_game(client)
         sv = view["state_version"]
+
+        # Initially items dimension should show "尚无发现"
+        items_dim = [
+            d
+            for d in view["investigation_progress"]["evidence_dimensions"]
+            if d["dimension_id"] == "items"
+        ]
+        assert items_dim
+        assert items_dim[0]["status_label"] == "尚无发现"
+
+        # Discover a document (items dimension) clue
         r = _do_action(client, save_id, "inspect", "clue_material_receipt", sv)
         assert r["success"]
         v = _get_view(client, save_id)
-        # clue_material_receipt is document → items dimension
         items_dim = [
             d
             for d in v["investigation_progress"]["evidence_dimensions"]
             if d["dimension_id"] == "items"
         ]
-        assert items_dim
-        assert items_dim[0]["found"] >= 1
+        # Status label should have changed
+        assert items_dim[0]["status_label"] != "尚无发现"
 
 
 class TestNoLeakage:

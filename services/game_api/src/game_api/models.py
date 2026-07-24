@@ -202,12 +202,13 @@ class EventLogEntry(BaseModel):
 
 
 class EvidenceDimension(BaseModel):
-    """Status of a single evidence dimension."""
+    """Status of a single evidence dimension.
+
+    Must NOT expose exact counts (found/total) to prevent clue counting.
+    """
 
     dimension_id: str
     label: str
-    total: int
-    found: int
     status_label: str  # 尚无发现 / 出现疑点 / 线索增加 / 相互印证 / 基本明确
 
 

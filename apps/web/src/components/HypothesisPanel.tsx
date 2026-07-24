@@ -2,6 +2,7 @@ import type { HypothesisInfo } from "../types";
 
 interface Props {
   hypotheses: HypothesisInfo[];
+  resolutionAvailable?: boolean;
 }
 
 function statusBadge(status: HypothesisInfo["status"]) {
@@ -19,7 +20,20 @@ function statusBadge(status: HypothesisInfo["status"]) {
   }
 }
 
-export default function HypothesisPanel({ hypotheses }: Props) {
+export default function HypothesisPanel({ hypotheses, resolutionAvailable }: Props) {
+  if (!resolutionAvailable) {
+    return (
+      <div className="card mb-4">
+        <h3 className="text-mystic-gold text-sm font-bold mb-2 tracking-wider">
+          推理假设
+        </h3>
+        <p className="text-mystic-text-dim text-xs italic">
+          目前的证据还不足以形成稳定判断。
+        </p>
+      </div>
+    );
+  }
+
   if (hypotheses.length === 0) {
     return (
       <div className="card mb-4">

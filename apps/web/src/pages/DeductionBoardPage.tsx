@@ -138,10 +138,13 @@ export default function DeductionBoardPage() {
 
       {/* Hypotheses Section */}
       <div className="mt-6">
-        <HypothesisPanel hypotheses={view.hypotheses} />
+        <HypothesisPanel
+          hypotheses={view.hypotheses}
+          resolutionAvailable={view.investigation_progress?.resolution_available}
+        />
 
         {/* Hypothesis Submission */}
-        {view.hypotheses.some((h) => h.can_submit) && (
+        {view.investigation_progress?.resolution_available && view.hypotheses.some((h) => h.can_submit) && (
           <div className="card mt-4">
             <h3 className="text-mystic-gold text-sm font-bold mb-3 tracking-wider">
               提交假设

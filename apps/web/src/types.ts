@@ -106,12 +106,10 @@ export interface ActionInfo {
   parameters_schema: Record<string, unknown>;
 }
 
-/** Status of a single evidence dimension */
+/** Status of a single evidence dimension. Must NOT expose exact counts. */
 export interface EvidenceDimension {
   dimension_id: string;
   label: string;
-  total: number;
-  found: number;
   status_label: string;
 }
 

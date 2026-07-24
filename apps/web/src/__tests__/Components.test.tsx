@@ -301,12 +301,22 @@ describe("NpcDialogue", () => {
 
 describe("HypothesisPanel", () => {
   it("renders empty state when no hypotheses", () => {
-    render(<HypothesisPanel hypotheses={[]} />);
+    render(<HypothesisPanel hypotheses={[]} resolutionAvailable={true} />);
     expect(screen.getByText("暂无假设")).toBeTruthy();
   });
 
+  it("shows placeholder when resolution not available", () => {
+    render(<HypothesisPanel hypotheses={[]} resolutionAvailable={false} />);
+    expect(screen.getByText("目前的证据还不足以形成稳定判断。")).toBeTruthy();
+  });
+
   it("renders hypothesis titles and statuses", () => {
-    render(<HypothesisPanel hypotheses={mockHypotheses} />);
+    render(
+      <HypothesisPanel
+        hypotheses={mockHypotheses}
+        resolutionAvailable={true}
+      />
+    );
     expect(screen.getByText("失踪案与灰雾有关")).toBeTruthy();
     expect(screen.getByText("待验证")).toBeTruthy();
     expect(screen.getByText("已确认")).toBeTruthy();
@@ -314,13 +324,23 @@ describe("HypothesisPanel", () => {
   });
 
   it("shows locked hypothesis as ???", () => {
-    render(<HypothesisPanel hypotheses={mockHypotheses} />);
+    render(
+      <HypothesisPanel
+        hypotheses={mockHypotheses}
+        resolutionAvailable={true}
+      />
+    );
     expect(screen.getByText("???")).toBeTruthy();
     expect(screen.getByText("未解锁")).toBeTruthy();
   });
 
   it("shows clue progress for unlocked hypotheses", () => {
-    render(<HypothesisPanel hypotheses={mockHypotheses} />);
+    render(
+      <HypothesisPanel
+        hypotheses={mockHypotheses}
+        resolutionAvailable={true}
+      />
+    );
     expect(screen.getByText("线索 1/3")).toBeTruthy();
   });
 
@@ -332,8 +352,25 @@ describe("HypothesisPanel", () => {
         found_clue_count: 3,
       },
     ];
-    render(<HypothesisPanel hypotheses={submitableHyp} />);
+    render(
+      <HypothesisPanel
+        hypotheses={submitableHyp}
+        resolutionAvailable={true}
+      />
+    );
     expect(screen.getByText("可提交")).toBeTruthy();
+  });
+
+  it("does NOT show hypothesis details without resolution", () => {
+    render(
+      <HypothesisPanel
+        hypotheses={mockHypotheses}
+        resolutionAvailable={false}
+      />
+    );
+    expect(screen.queryByText("失踪案与灰雾有关")).toBeNull();
+    expect(screen.queryByText("线索 1/3")).toBeNull();
+    expect(screen.getByText("目前的证据还不足以形成稳定判断。")).toBeTruthy();
   });
 });
 

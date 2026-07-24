@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGameStore } from "../store";
 import PlayerStatus from "../components/PlayerStatus";
@@ -26,6 +26,7 @@ export default function GamePage() {
   const [selectedClue, setSelectedClue] = useState<ClueInfo | null>(null);
   const [showProgress, setShowProgress] = useState(false);
   const [showResolutionHint, setShowResolutionHint] = useState(false);
+  const progressButtonRef = useRef<HTMLButtonElement>(null);
 
   // A8: Show resolution hint when new_resolution_available is true
   useEffect(() => {
@@ -69,6 +70,15 @@ export default function GamePage() {
     setShowResolutionHint(false);
     navigate("/deduction");
   }, [navigate]);
+
+  // Close progress modal and restore focus to the trigger button
+  const handleCloseProgress = useCallback(() => {
+    setShowProgress(false);
+    // Restore focus to the "调查进度" button that opened the modal
+    requestAnimationFrame(() => {
+      progressButtonRef.current?.focus();
+    });
+  }, []);
 
   // A7: Navigation state machine — redirect based on game state
   useEffect(() => {
@@ -295,11 +305,15 @@ export default function GamePage() {
         <EventLog entries={view.event_log} />
 
         {/* Hypothesis Panel */}
-        <HypothesisPanel hypotheses={view.hypotheses} />
+        <HypothesisPanel
+          hypotheses={view.hypotheses}
+          resolutionAvailable={view.investigation_progress?.resolution_available}
+        />
 
         {/* Sidebar Navigation */}
         <div className="space-y-2">
           <button
+            ref={progressButtonRef}
             onClick={() => setShowProgress(true)}
             className="btn-secondary w-full text-sm"
           >
@@ -389,7 +403,7 @@ export default function GamePage() {
       {showProgress && view?.investigation_progress && (
         <InvestigationProgressModal
           progress={view.investigation_progress}
-          onClose={() => setShowProgress(false)}
+          onClose={handleCloseProgress}
           onGoToDeduction={handleGoToDeduction}
         />
       )}

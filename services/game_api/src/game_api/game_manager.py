@@ -394,8 +394,6 @@ class GameSession:
                 EvidenceDimension(
                     dimension_id=dim_id,
                     label=label,
-                    total=total_in_dim,
-                    found=found_in_dim,
                     status_label=status_label,
                 )
             )

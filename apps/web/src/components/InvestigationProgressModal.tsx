@@ -25,23 +25,14 @@ const STATUS_COLORS: Record<string, string> = {
   "基本明确": "bg-mystic-gold/60",
 };
 
-/** Map status_label to width percentage */
-function statusWidth(status: string): string {
-  switch (status) {
-    case "尚无发现":
-      return "w-1/12";
-    case "出现疑点":
-      return "w-1/4";
-    case "线索增加":
-      return "w-2/5";
-    case "相互印证":
-      return "w-3/5";
-    case "基本明确":
-      return "w-11/12";
-    default:
-      return "w-0";
-  }
-}
+/** Map status_label to fixed width (not based on clue count) */
+const STATUS_WIDTHS: Record<string, string> = {
+  "尚无发现": "w-1/12",
+  "出现疑点": "w-1/4",
+  "线索增加": "w-2/5",
+  "相互印证": "w-3/5",
+  "基本明确": "w-11/12",
+};
 
 function PhaseIndicator({ level, label }: { level: number; label: string }) {
   const phases = [
@@ -230,20 +221,15 @@ export default function InvestigationProgressModal({
                       {dim.label}
                     </span>
                     <span className="text-xs text-mystic-text-dim">
-                      {dim.found}/{dim.total}
+                      {dim.status_label}
                     </span>
                   </div>
                   <div className="h-1.5 bg-mystic-card/50 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         STATUS_COLORS[dim.status_label] || "bg-mystic-text-dim/20"
-                      }`}
-                      style={{ width: `${(dim.found / Math.max(dim.total, 1)) * 100}%` }}
-                      role="progressbar"
-                      aria-valuenow={dim.found}
-                      aria-valuemin={0}
-                      aria-valuemax={dim.total}
-                      aria-label={`${dim.label}: ${dim.found}/${dim.total}`}
+                      } ${STATUS_WIDTHS[dim.status_label] || "w-0"}`}
+                      aria-hidden="true"
                     />
                   </div>
                   <p className="text-xs text-mystic-text-dim mt-0.5">{dim.status_label}</p>
