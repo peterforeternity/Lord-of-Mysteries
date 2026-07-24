@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, memo } from "react";
 import type { InvestigationProgress } from "../types";
 
 interface Props {
@@ -56,7 +56,7 @@ function PhaseIndicator({ level, label }: { level: number; label: string }) {
         {phases.map((p, i) => (
           <div
             key={p.label}
-            className={`flex-1 h-1.5 rounded-full transition-colors duration-500 ${
+            className={`flex-1 h-1.5 rounded-full ${
               i <= level
                 ? "bg-mystic-gold"
                 : "bg-mystic-card/50"
@@ -73,7 +73,7 @@ function PhaseIndicator({ level, label }: { level: number; label: string }) {
   );
 }
 
-export default function InvestigationProgressModal({
+export default /*#__PURE__*/memo(function InvestigationProgressModal({
   progress,
   onClose,
   onGoToDeduction,
@@ -147,7 +147,7 @@ export default function InvestigationProgressModal({
       role="presentation"
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
+      <div className="absolute inset-0 bg-black/70" aria-hidden="true" />
 
       {/* Dialog — mobile drawer, desktop modal */}
       <div
@@ -158,7 +158,6 @@ export default function InvestigationProgressModal({
         className="relative z-10 w-full sm:max-w-lg max-h-[85vh] sm:max-h-[80vh] overflow-y-auto
           bg-mystic-surface border-t sm:border border-mystic-card/80
           rounded-t-xl sm:rounded-lg
-          motion-safe:animate-in motion-safe:slide-in-from-bottom sm:motion-safe:zoom-in-95
           shadow-2xl shadow-black/50"
         style={
           {
@@ -226,7 +225,7 @@ export default function InvestigationProgressModal({
                   </div>
                   <div className="h-1.5 bg-mystic-card/50 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all duration-700 ${
+                      className={`h-full rounded-full ${
                         STATUS_COLORS[dim.status_label] || "bg-mystic-text-dim/20"
                       } ${STATUS_WIDTHS[dim.status_label] || "w-0"}`}
                       aria-hidden="true"
@@ -307,4 +306,4 @@ export default function InvestigationProgressModal({
       </div>
     </div>
   );
-}
+});
