@@ -21,12 +21,25 @@ export default function GamePage() {
     saveGame,
     pendingActions,
     saveId,
+    initFromStorage,
+    clearActiveSave,
   } = useGameStore();
   const [dialogueNpc, setDialogueNpc] = useState<NpcInfo | null>(null);
   const [selectedClue, setSelectedClue] = useState<ClueInfo | null>(null);
   const [showProgress, setShowProgress] = useState(false);
   const [showResolutionHint, setShowResolutionHint] = useState(false);
+  const [initialised, setInitialised] = useState(false);
   const progressButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileProgressButtonRef = useRef<HTMLButtonElement>(null);
+  const [progressTrigger, setProgressTrigger] = useState<"desktop" | "mobile" | null>(null);
+
+  // Restore active game from localStorage on first mount
+  useEffect(() => {
+    if (!initialised) {
+      setInitialised(true);
+      initFromStorage();
+    }
+  }, [initialised, initFromStorage]);
 
   // A8: Show resolution hint when new_resolution_available is true
   useEffect(() => {
@@ -74,10 +87,20 @@ export default function GamePage() {
   // Close progress modal and restore focus to the trigger button
   const handleCloseProgress = useCallback(() => {
     setShowProgress(false);
-    // Restore focus to the "调查进度" button that opened the modal
+    // Restore focus to whichever "调查进度" button opened the modal
     requestAnimationFrame(() => {
-      progressButtonRef.current?.focus();
+      if (progressTrigger === "mobile") {
+        mobileProgressButtonRef.current?.focus();
+      } else {
+        progressButtonRef.current?.focus();
+      }
     });
+  }, [progressTrigger]);
+
+  // Open progress modal from desktop or mobile button
+  const handleOpenProgress = useCallback((source: "desktop" | "mobile") => {
+    setProgressTrigger(source);
+    setShowProgress(true);
   }, []);
 
   // A7: Navigation state machine — redirect based on game state
@@ -91,12 +114,13 @@ export default function GamePage() {
       return;
     }
     if (view?.game_over) {
+      clearActiveSave();
       navigate(`/ending?save_id=${encodeURIComponent(saveId)}`, {
         replace: true,
       });
       return;
     }
-  }, [view, saveId, loading, navigate]);
+  }, [view, saveId, loading, navigate, clearActiveSave]);
 
   // A7: Fetch view on mount if saveId exists but view is null
   useEffect(() => {
@@ -231,16 +255,6 @@ export default function GamePage() {
           </div>
         </div>
 
-        {/* Mobile: Player Status (visible only on mobile) */}
-        <div className="lg:hidden mb-4">
-          <PlayerStatus status={view.player} />
-        </div>
-
-        {/* Mobile: Clues */}
-        <div className="lg:hidden mb-4">
-          <ClueList clues={view.clues} onClueClick={setSelectedClue} />
-        </div>
-
         {/* NPCs */}
         {view.npcs.length > 0 && (
           <div className="card mb-4">
@@ -314,7 +328,7 @@ export default function GamePage() {
         <div className="space-y-2">
           <button
             ref={progressButtonRef}
-            onClick={() => setShowProgress(true)}
+            onClick={() => handleOpenProgress("desktop")}
             className="btn-secondary w-full text-sm"
           >
             调查进度
@@ -352,6 +366,19 @@ export default function GamePage() {
           </button>
         </div>
       </aside>
+
+      {/* ========== MOBILE-ONLY SECTION (below sidebar in DOM so desktop buttons come first) ========== */}
+      <div className="lg:hidden space-y-4 w-full">
+        <PlayerStatus status={view.player} />
+        <ClueList clues={view.clues} onClueClick={setSelectedClue} />
+        <button
+          ref={mobileProgressButtonRef}
+          onClick={() => handleOpenProgress("mobile")}
+          className="btn-secondary w-full text-sm"
+        >
+          调查进度
+        </button>
+      </div>
 
       {/* ========== NPC Dialogue Modal ========== */}
       {dialogueNpc && (

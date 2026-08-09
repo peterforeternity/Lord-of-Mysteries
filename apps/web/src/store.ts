@@ -20,9 +20,43 @@ interface GameState {
   saveGame: () => Promise<void>;
   loadGame: (saveId: string) => Promise<void>;
   fetchView: () => Promise<void>;
+  initFromStorage: () => Promise<void>;
+  clearActiveSave: () => void;
   clearError: () => void;
   setActionPending: (actionId: string) => void;
   clearActionPending: (actionId: string) => void;
+}
+
+const STORAGE_KEY_SAVE_ID = "active_save_id";
+const STORAGE_KEY_CASE_ID = "active_case_id";
+
+function persistSave(saveId: string, caseId: string): void {
+  try {
+    localStorage.setItem(STORAGE_KEY_SAVE_ID, saveId);
+    localStorage.setItem(STORAGE_KEY_CASE_ID, caseId);
+  } catch {
+    // localStorage may be unavailable
+  }
+}
+
+function clearPersistedSave(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY_SAVE_ID);
+    localStorage.removeItem(STORAGE_KEY_CASE_ID);
+  } catch {
+    // localStorage may be unavailable
+  }
+}
+
+function readPersistedSave(): { saveId: string; caseId: string } | null {
+  try {
+    const saveId = localStorage.getItem(STORAGE_KEY_SAVE_ID);
+    const caseId = localStorage.getItem(STORAGE_KEY_CASE_ID);
+    if (saveId && caseId) return { saveId, caseId };
+  } catch {
+    // localStorage may be unavailable
+  }
+  return null;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -52,6 +86,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const res = await api.newGame(caseId, seed);
+      persistSave(res.save_id, caseId);
       set({ saveId: res.save_id, view: res.view, loading: false });
     } catch (err) {
       set({
@@ -59,6 +94,25 @@ export const useGameStore = create<GameState>((set, get) => ({
         loading: false,
       });
     }
+  },
+
+  initFromStorage: async () => {
+    const saved = readPersistedSave();
+    if (!saved) return;
+    set({ saveId: saved.saveId, loading: true });
+    try {
+      const view = await api.getView(saved.saveId, saved.saveId);
+      set({ view, loading: false });
+    } catch {
+      // Save not found or API error — clear localStorage and reset
+      clearPersistedSave();
+      set({ saveId: null, view: null, loading: false, error: null });
+    }
+  },
+
+  clearActiveSave: () => {
+    clearPersistedSave();
+    set({ saveId: null, view: null, loading: false, error: null });
   },
 
   executeAction: async (action: ActionRequestInput, actionId?: string) => {
